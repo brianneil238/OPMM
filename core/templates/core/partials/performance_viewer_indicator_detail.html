@@ -1,0 +1,80 @@
+{% if selected_record %}
+<div class="viewer-detail-section">
+    <h6>Matrix hierarchy</h6>
+    <p class="small text-muted mb-2">
+        <span class="text-danger fw-semibold">Outcome</span> · {{ selected_record.matrix_outcome }}<br>
+        <span class="text-success fw-semibold">Strategy</span> · {{ selected_record.matrix_strategy }}<br>
+        <span class="text-primary fw-semibold">PAP</span> · {{ selected_record.matrix_pap }}
+    </p>
+
+    <h6>Indicator</h6>
+    <p class="fw-semibold text-dark mb-2">{{ selected_record.indicator.description }}</p>
+
+    <div class="viewer-detail-status-row" role="status" aria-label="Performance status for this period">
+        <span class="text-muted small fw-bold text-uppercase" style="letter-spacing: 0.06em;">Status</span>
+        <span class="viewer-status-badge-lg">
+            {% if selected_record.status == 'MET' %}
+            <span class="viewer-status-met">Met</span>
+            {% elif selected_record.status == 'UNMET' %}
+            <span class="viewer-status-unmet">Unmet</span>
+            {% else %}
+            <span class="viewer-status-pending">Pending</span>
+            {% endif %}
+        </span>
+    </div>
+
+    {% if selected_record.variance_text %}
+    <h6>Variance (matrix)</h6>
+    <p class="fw-semibold text-dark mb-2">{{ selected_record.variance_text }}</p>
+    {% endif %}
+
+    <h6>Office</h6>
+    <p>{{ selected_record.indicator.pap.office.name|default:"—" }}</p>
+
+    <h6>Period</h6>
+    <p>FY {{ selected_record.year }} &middot; Quarter {{ selected_record.quarter }}</p>
+
+    <h6>Target vs. Accomplishment</h6>
+    <p>
+        Target: <span class="accent">{% if selected_record.target_value is not None %}{{ selected_record.target_value|floatformat:"-2" }}{% else %}Not parsed{% endif %}</span><br>
+        Accomplished: <span class="accent">{{ selected_record.actual_value|default_if_none:"not reported"|floatformat:"-2" }}</span>
+    </p>
+
+    <h6>Variance Explanation</h6>
+    <p>
+        {% if selected_record.status == 'MET' %}
+        Target met for Q{{ selected_record.quarter }}, FY {{ selected_record.year }}. Reported value reaches or exceeds the planned commitment.
+        {% elif selected_record.status == 'UNMET' %}
+        {% if selected_record.actual_value is None %}
+        No accomplishment value reported yet for this period.
+        {% else %}
+        Reported value is below the planned target.
+        {% endif %}
+        {% else %}
+        {% if selected_record.actual_value is None %}
+        Awaiting reported accomplishment for this period.
+        {% elif selected_record.target_value is None %}
+        No numeric target was parsed from the indicator text (calendar years like FY 2025 are ignored). Put the goal in parentheses, e.g. &ldquo;… (100)&rdquo;, or set the target in Django admin.
+        {% else %}
+        Awaiting scored status for this period.
+        {% endif %}
+        {% endif %}
+    </p>
+
+    {% if selected_record.raw_actual_text %}
+    <h6>Office Note</h6>
+    <p>{{ selected_record.raw_actual_text|truncatechars:240 }}</p>
+    {% endif %}
+
+    <h6>Action Plan</h6>
+    <p class="text-muted mb-0">
+        {% if selected_record.status == 'MET' %}
+        Sustain current implementation, monitor next quarter.
+        {% else %}
+        Coordinate with the responsible office to identify gaps and submit a recovery plan.
+        {% endif %}
+    </p>
+</div>
+{% else %}
+<p class="text-muted mb-0">This indicator row could not be found.</p>
+{% endif %}

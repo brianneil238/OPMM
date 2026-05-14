@@ -1,0 +1,38 @@
+<div class="sopm-help-announcements-block">
+    <p class="text-muted small mb-3 mb-md-4 sopm-help-inset-note">
+        Messages from administrators. Office-specific posts only appear for users linked to those offices.
+    </p>
+    {% if announcements %}
+    {% for a in announcements %}
+    <div class="sopm-announcement-card mb-3">
+        <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-2">
+            <strong class="text-dark mb-0 sopm-announcement-card__title">{{ a.title }}</strong>
+            {% if a.scope == 'global' %}
+            <span class="badge rounded-pill sopm-announcement-badge sopm-announcement-badge--all">All offices</span>
+            {% else %}
+            <span class="badge rounded-pill sopm-announcement-badge sopm-announcement-badge--off">Selected offices</span>
+            {% endif %}
+        </div>
+        <div class="sopm-announcement-body text-secondary">{{ a.body|linebreaksbr }}</div>
+        <div class="sopm-announcement-meta text-muted mt-2 sopm-announcement-meta-line">
+            {{ a.created_at|date:"M j, Y" }}
+            {% if a.scope == 'global' %}
+            · Visible to everyone
+            {% else %}
+            · Offices:
+            {% for o in a.offices.all %}
+            {{ o.name }}{% if not forloop.last %}, {% endif %}
+            {% empty %}
+            (none linked)
+            {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="sopm-help-empty-news rounded-3 border bg-light p-4 text-center">
+        <i class="fas fa-inbox text-muted mb-2 d-block fs-4" aria-hidden="true"></i>
+        <p class="mb-0 text-secondary small">There are no active announcements for you right now. When administrators publish something new, it will appear here and in the bell drawer beside your account.</p>
+    </div>
+    {% endif %}
+</div>

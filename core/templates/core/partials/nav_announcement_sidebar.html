@@ -1,0 +1,42 @@
+{% if user.is_authenticated %}
+<div id="sopm-announcement-backdrop" class="sopm-announcement-backdrop" aria-hidden="true"></div>
+<aside id="sopm-announcement-panel" class="sopm-announcement-panel" role="complementary" aria-labelledby="sopm-announcement-panel-title" aria-hidden="true" data-announcement-ids="{% for a in nav_announcement_list %}{{ a.pk }}{% if not forloop.last %},{% endif %}{% endfor %}">
+    <div class="sopm-announcement-panel__header">
+        <div>
+            <h2 id="sopm-announcement-panel-title" class="h6 fw-bold mb-0 text-dark">Announcements</h2>
+            <p class="small text-muted mb-0 mt-1">For your office or everyone, depending on how each notice was posted.</p>
+        </div>
+        <button type="button" class="btn btn-sm btn-light border rounded-circle sopm-announcement-panel__close" id="sopm-announcement-panel-close" aria-label="Close announcements">
+            <i class="fas fa-times" aria-hidden="true"></i>
+        </button>
+    </div>
+    <div class="sopm-announcement-panel__body">
+        {% for a in nav_announcement_list %}
+        <article class="sopm-announcement-panel__card">
+            <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-2">
+                <h3 class="h6 fw-bold mb-0 text-dark">{{ a.title }}</h3>
+                {% if a.scope == 'global' %}
+                <span class="badge rounded-pill sopm-announcement-panel__badge sopm-announcement-panel__badge--all">All offices</span>
+                {% else %}
+                <span class="badge rounded-pill sopm-announcement-panel__badge sopm-announcement-panel__badge--off">Office-specific</span>
+                {% endif %}
+            </div>
+            <div class="sopm-announcement-panel__text text-secondary">{{ a.body|linebreaksbr }}</div>
+            <div class="sopm-announcement-panel__meta text-muted small mt-2">
+                {{ a.created_at|date:"M j, Y" }}
+                {% if a.scope != 'global' %}
+                ·
+                {% for o in a.offices.all %}
+                {{ o.name }}{% if not forloop.last %}, {% endif %}
+                {% empty %}
+                <span class="fst-italic">No offices linked</span>
+                {% endfor %}
+                {% endif %}
+            </div>
+        </article>
+        {% empty %}
+        <p class="text-muted small mb-0 py-4 text-center">There are no active announcements for you right now.</p>
+        {% endfor %}
+    </div>
+</aside>
+{% endif %}

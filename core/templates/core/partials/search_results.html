@@ -1,0 +1,27 @@
+{% if results %}
+<div class="search-dropdown">
+    <div class="search-dropdown-header">Matches — click to open in the viewer</div>
+    <div class="search-dropdown-list">
+        {% for row in results %}
+        <a class="search-item" href="#"
+           data-indicator-id="{{ row.id }}"
+           role="button">
+            <span class="target-icon"><i class="fas fa-bullseye"></i></span>
+            <span class="flex-grow-1 min-w-0">
+                <div class="target-primary-block">
+                    <span class="target-primary-kicker">{{ row.primary_tag }}</span>
+                    <span class="target-title target-primary-line d-block">{{ row.primary_text|truncatechars:168 }}</span>
+                </div>
+                {% for line in row.secondary %}
+                <span class="target-matrix-label d-block"><span class="target-matrix-tag">{{ line.tag }}</span> {{ line.text|truncatechars:118 }}</span>
+                {% endfor %}
+            </span>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% else %}
+<div class="search-dropdown">
+    <div class="search-empty"><i class="fas fa-search me-2 text-muted"></i> No matching targets.</div>
+</div>
+{% endif %}

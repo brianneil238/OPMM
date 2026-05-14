@@ -1,0 +1,663 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<style>
+    .an-page { max-width: 1220px; margin: 0 auto; padding-top: 0.35rem; }
+    .an-hero {
+        margin-bottom: 1.75rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid #e8eef5;
+    }
+    .an-hero-top { margin-bottom: 1.25rem; }
+    @media (min-width: 768px) {
+        .an-hero-top { margin-bottom: 1.5rem; }
+    }
+    @media (prefers-reduced-motion: no-preference) {
+        .an-hero-entrance {
+            animation: anHeroIn 0.75s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+        .an-filter-card {
+            animation: anHeroIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.08s both;
+        }
+        .an-kpi-row > .col-md-4:nth-child(1) .an-stat { animation: anStatRise 0.65s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both; }
+        .an-kpi-row > .col-md-4:nth-child(2) .an-stat { animation: anStatRise 0.65s cubic-bezier(0.22, 1, 0.36, 1) 0.22s both; }
+        .an-kpi-row > .col-md-4:nth-child(3) .an-stat { animation: anStatRise 0.65s cubic-bezier(0.22, 1, 0.36, 1) 0.32s both; }
+        .an-kpi-row .an-stat-icon {
+            animation: anIconPop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+        }
+        .an-kpi-row > .col-md-4:nth-child(1) .an-stat-icon { animation-delay: 0.28s; }
+        .an-kpi-row > .col-md-4:nth-child(2) .an-stat-icon { animation-delay: 0.38s; }
+        .an-kpi-row > .col-md-4:nth-child(3) .an-stat-icon { animation-delay: 0.48s; }
+        .an-area-card {
+            animation: anQuarterlyCardIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.06s both;
+        }
+        .an-area-chart-inner {
+            animation: anQuarterlySurfaceIn 1s cubic-bezier(0.22, 1, 0.36, 1) 0.18s both;
+        }
+        .an-office-section {
+            animation: anOfficeSectionIn 0.95s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+        .an-office-grid .col-lg-6:first-child .an-subchart {
+            animation: anSubchartSlide 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both;
+        }
+        .an-office-grid .col-lg-6:last-child .an-subchart {
+            animation: anSubchartSlide 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.22s both;
+        }
+        .an-chart-pair-row .an-chart-card-head .an-chart-icon-wrap {
+            animation: anChartIconNudge 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+        .an-chart-pair-row > .col-lg-6:nth-child(2) .an-chart-icon-wrap { animation-delay: 0.1s; }
+    }
+    @keyframes anHeroIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes anStatRise {
+        from { opacity: 0; transform: translateY(12px) scale(0.98); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes anIconPop {
+        from { opacity: 0; transform: scale(0.5); }
+        to { opacity: 1; transform: scale(1); }
+    }
+    @keyframes anOfficeSectionIn {
+        from { opacity: 0; transform: translateY(18px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes anSubchartSlide {
+        from { opacity: 0; transform: translateX(12px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes anChartIconNudge {
+        from { opacity: 0; transform: scale(0.85) rotate(-6deg); }
+        to { opacity: 1; transform: scale(1) rotate(0deg); }
+    }
+    .an-eyebrow {
+        font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+        color: #c00000; margin-bottom: 0.45rem;
+    }
+    .an-heading { font-size: clamp(1.4rem, 2.6vw, 1.75rem); font-weight: 800; color: #0f172a; letter-spacing: -0.03em; margin: 0; line-height: 1.18; }
+    .an-lede { font-size: 0.9rem; color: #64748b; margin: 0.55rem 0 0; max-width: 42rem; line-height: 1.55; }
+    .an-badge {
+        display: inline-flex; align-items: center; gap: 0.35rem;
+        margin-top: 0.75rem; padding: 0.3rem 0.75rem; border-radius: 999px;
+        font-size: 0.72rem; font-weight: 600; color: #5c2a2a; background: #fdf5f5; border: 1px solid #e5d6d8;
+    }
+    .an-filter-card {
+        display: flex; flex-wrap: wrap; align-items: center; gap: 0.65rem 0.85rem;
+        padding: 1rem 1.15rem;
+        background: #fff; border: 1px solid #e8eef5;
+        border-radius: 16px;
+        box-shadow: 0 2px 14px rgba(15, 23, 42, 0.055);
+    }
+    .an-filter-card .form-select {
+        min-width: 8.5rem; max-width: 100%; flex: 1 1 10rem;
+        width: auto; border-radius: 11px; border-color: #e2e8f0; font-size: 0.875rem;
+        font-weight: 600; color: #334155;
+        padding-top: 0.5rem; padding-bottom: 0.5rem; padding-left: 0.75rem;
+    }
+    .an-filter-card .form-select:focus { border-color: #c00000; box-shadow: 0 0 0 3px rgba(192, 0, 0, 0.08); }
+    .an-filter-card .btn-primary {
+        border-radius: 11px; font-weight: 700; font-size: 0.875rem; padding: 0.5rem 1.25rem;
+        background: #c00000; border-color: #c00000; min-width: 6.75rem;
+    }
+    .an-filter-card .btn-primary:hover { background: #9a0000; border-color: #7a0000; }
+    @media (min-width: 576px) {
+        .an-filter-card .btn-primary { margin-left: auto; }
+    }
+    @media (max-width: 575.98px) {
+        .an-filter-card { flex-direction: column; align-items: stretch; }
+        .an-filter-card .form-select { flex: 1 1 auto; width: 100%; max-width: none; min-width: 0; }
+        .an-filter-card .btn-primary { width: 100%; margin-left: 0; }
+    }
+
+    .an-stat {
+        height: 100%; background: #fff; border: 1px solid #e8eef5; border-radius: 16px;
+        padding: 1.2rem 1.25rem; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.045);
+        display: flex; gap: 1rem; align-items: center;
+        transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+    }
+    .an-stat:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 28px rgba(15, 23, 42, 0.07);
+        border-color: #d1dae5;
+    }
+    .an-stat-icon {
+        width: 2.5rem; height: 2.5rem; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+        font-size: 0.95rem; flex-shrink: 0;
+    }
+    .an-stat-icon.records { background: #f1f5f9; color: #475569; }
+    .an-stat-icon.met { background: #dcfce7; color: #15803d; }
+    .an-stat-icon.unmet { background: #fee2e2; color: #b91c1c; }
+    .an-stat-label { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #64748b; margin-bottom: 0.2rem; }
+    .an-stat-value { font-size: 1.85rem; font-weight: 800; line-height: 1; color: #0f172a; letter-spacing: -0.02em; }
+    .an-stat-value.met { color: #15803d; }
+    .an-stat-value.unmet { color: #b91c1c; }
+
+    .an-chart-card {
+        background: #fff; border: 1px solid #e8eef5; border-radius: 18px;
+        box-shadow: 0 2px 12px rgba(15, 23, 42, 0.045); overflow: hidden; margin-bottom: 1.25rem;
+    }
+    .an-chart-card-head {
+        padding: 1.1rem 1.35rem 1rem; border-bottom: 1px solid #f0f4f8;
+        display: flex; align-items: flex-start; gap: 0.85rem; flex-shrink: 0;
+        background: linear-gradient(180deg, #fcfdfe 0%, #fafbfd 100%);
+    }
+    .an-chart-icon-wrap {
+        width: 2.5rem; height: 2.5rem; border-radius: 12px; flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center;
+        background: linear-gradient(145deg, #e0f7ff 0%, #cff0fa 100%);
+        color: #c00000; font-size: 1rem; border: 1px solid rgba(192, 0, 0, 0.18);
+    }
+    /* Quarterly % met — positive / attainment cue (green) */
+    .an-chart-icon-wrap--met-trend {
+        background: linear-gradient(145deg, #ecfdf3 0%, #d1fae5 100%);
+        color: #15803d;
+        border: 1px solid rgba(22, 163, 74, 0.28);
+    }
+    .an-chart-title { font-size: 1rem; font-weight: 800; color: #0f172a; margin: 0; letter-spacing: -0.02em; line-height: 1.25; }
+    .an-chart-card-body { padding: 1rem 1.25rem 1.2rem; }
+    .an-note { font-size: 0.78rem; color: #64748b; line-height: 1.45; margin: 0.45rem 0 0; max-width: 100%; }
+    .an-chart-surface {
+        background: #f8fafc; border: 1px solid #e8eef5; border-radius: 14px;
+        padding: 0.65rem 0.6rem 0.4rem; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    }
+    .an-chart-wrap { position: relative; height: min(280px, 36vh); }
+    .an-chart-area-status { position: relative; height: min(440px, 70vh); min-height: 280px; max-width: 100%; cursor: pointer; }
+
+    /* Pair row: equal gutters; cards stretch; chart area fills remaining height */
+    .an-chart-pair-row { align-items: stretch; }
+    .an-chart-pair-row > [class*="col-"] > .an-chart-card { min-height: min(480px, 78vh); }
+    .an-chart-pair-row .an-chart-card { margin-bottom: 0; border-radius: 16px; }
+    .an-chart-pair-row .an-chart-card-head { padding: 1rem 1.2rem 0.9rem; }
+    .an-chart-pair-row .an-chart-title { font-size: 0.98rem; }
+    .an-chart-pair-row .an-note { font-size: 0.74rem; line-height: 1.42; }
+    .an-chart-pair-row .an-chart-card-body {
+        flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0;
+        padding: 0.85rem 1.15rem 1.1rem;
+    }
+    .an-chart-pair-row .an-chart-surface {
+        flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0;
+        padding: 0.55rem 0.45rem 0.35rem;
+    }
+    .an-chart-pair-row .an-chart-wrap,
+    .an-chart-pair-row .an-chart-area-status {
+        flex: 1 1 auto; min-height: 0; height: 100%;
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+        .an-quarterly-card {
+            animation: anQuarterlyCardIn 0.95s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+        .an-quarterly-chart-wrap {
+            animation: anQuarterlySurfaceIn 1.05s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both;
+        }
+    }
+    @keyframes anQuarterlyCardIn {
+        from { opacity: 0; transform: translateY(16px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes anQuarterlySurfaceIn {
+        from { opacity: 0.4; transform: scale(0.97); }
+        to { opacity: 1; transform: scale(1); }
+    }
+
+    .an-office-grid .an-subchart {
+        background: #f8fafc; border: 1px solid #e8eef5; border-radius: 14px; padding: 0.75rem 0.65rem 0.35rem;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
+    }
+    .an-subchart-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #94a3b8; margin-bottom: 0.35rem; padding-left: 0.15rem; }
+    .an-footnote { font-size: 0.78rem; color: #64748b; margin: 0.75rem 1.25rem 1rem; line-height: 1.45; }
+</style>
+
+<div class="an-page">
+    <header class="an-hero an-hero-entrance">
+        <div class="an-hero-top">
+            <p class="an-eyebrow mb-0">Analytics</p>
+            <h1 class="an-heading">Office performance</h1>
+            <p class="an-lede">
+                {% if scoped_office_name %}Figures for <strong>{{ scoped_office_name }}</strong>{% elif can_choose_office and not office_id %}Institution-wide view (all offices with data){% else %}Figures for the selected scope{% endif %}
+                — pick a fiscal year{% if can_choose_office %} and optionally one office{% endif %}, then <strong>Apply</strong>.
+            </p>
+            {% if scoped_office_name and not can_choose_office %}
+            <span class="an-badge"><i class="fas fa-building"></i> {{ scoped_office_name }}</span>
+            {% endif %}
+        </div>
+        <form method="get" class="an-filter-card" aria-label="Analytics filters">
+            <select name="year" class="form-select form-select-sm" aria-label="Fiscal year">
+                {% for y in available_years %}
+                <option value="{{ y }}" {% if y == year %}selected{% endif %}>FY {{ y }}</option>
+                {% endfor %}
+            </select>
+            {% if can_choose_office %}
+            <select name="office" class="form-select form-select-sm" aria-label="Office">
+                <option value="">All offices</option>
+                {% for o in available_offices %}
+                <option value="{{ o.id }}" {% if o.id == office_id %}selected{% endif %}>{{ o.name }}</option>
+                {% endfor %}
+            </select>
+            {% endif %}
+            <button type="submit" class="btn btn-sm btn-primary">Apply</button>
+        </form>
+    </header>
+
+    <div class="row g-4 mb-3 an-kpi-row">
+        <div class="col-md-4">
+            <div class="an-stat">
+                <div class="an-stat-icon records"><i class="fas fa-table-list"></i></div>
+                <div>
+                    <div class="an-stat-label">Records</div>
+                    <div class="an-stat-value">{{ total_records }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="an-stat">
+                <div class="an-stat-icon met"><i class="fas fa-circle-check"></i></div>
+                <div>
+                    <div class="an-stat-label">Met</div>
+                    <div class="an-stat-value met">{{ met }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="an-stat">
+                <div class="an-stat-icon unmet"><i class="fas fa-circle-xmark"></i></div>
+                <div>
+                    <div class="an-stat-label">Unmet</div>
+                    <div class="an-stat-value unmet">{{ unmet }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 an-chart-pair-row mb-4">
+        <div class="col-12 col-lg-6 d-flex align-items-stretch">
+            <section class="an-chart-card an-quarterly-card w-100 h-100 d-flex flex-column">
+                <div class="an-chart-card-head">
+                    <span class="an-chart-icon-wrap an-chart-icon-wrap--met-trend" aria-hidden="true"><i class="fas fa-chart-line"></i></span>
+                    <div>
+                        <h2 class="an-chart-title">Quarterly % met (scored rows)</h2>
+                        <p class="an-note mb-0">
+                            Each point counts rows in that quarter for <strong>FY {{ year }}</strong>.
+                            <strong>% Met</strong> uses scored rows only (<span class="text-success fw-semibold">Met</span> + <span class="text-danger fw-semibold">Unmet</span>); pending appears in the tooltip.
+                        </p>
+                    </div>
+                </div>
+                <div class="an-chart-card-body">
+                    <div class="an-chart-surface">
+                        <div class="an-chart-wrap an-quarterly-chart-wrap"><canvas id="anQuarterlyMetPct"></canvas></div>
+                    </div>
+                </div>
+            </section>
+        </div>
+        <div class="col-12 col-lg-6 d-flex align-items-stretch">
+            <section class="an-chart-card an-area-card w-100 h-100 d-flex flex-column">
+                <div class="an-chart-card-head">
+                    <span class="an-chart-icon-wrap" aria-hidden="true"><i class="fas fa-layer-group"></i></span>
+                    <div>
+                        <h2 class="an-chart-title">Status by OPMM area</h2>
+                        <p class="an-note mb-0">
+                            Each bar is one pillar; length is total scored rows. <strong>Click</strong> a bar for Met, Unmet, pending, and development-area labels. Click empty space to dismiss.
+                        </p>
+                    </div>
+                </div>
+                <div class="an-chart-card-body">
+                    <div class="an-chart-surface">
+                        <div class="an-chart-area-status an-area-chart-inner"><canvas id="anAreaStatusStack"></canvas></div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+    {{ trend_payload|json_script:"an-trend-data" }}
+    {{ area_payload|json_script:"an-area-status-data" }}
+
+    {% if office_chart_payload %}
+    <section class="an-chart-card an-office-section">
+        <div class="an-chart-card-head">
+            <span class="an-chart-icon-wrap" aria-hidden="true"><i class="fas fa-building"></i></span>
+            <div>
+                <h2 class="an-chart-title">Office comparison</h2>
+                <p class="an-note mb-0">Volume and attainment side by side for this fiscal year—scan counts on the left and % met on the right.</p>
+            </div>
+        </div>
+        <div class="an-chart-card-body">
+            <div class="row g-4 an-office-grid">
+                <div class="col-lg-6">
+                    <div class="an-subchart-label">By volume</div>
+                    <div class="an-subchart">
+                        <div class="an-chart-wrap"><canvas id="anOfficeVol"></canvas></div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="an-subchart-label">By attainment (% met)</div>
+                    <div class="an-subchart">
+                        <div class="an-chart-wrap"><canvas id="anOfficeRate"></canvas></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <p class="an-footnote mb-0"><strong>How to read:</strong> volume stacks met, unmet, and pending per office; attainment uses % met with pending in the denominator.</p>
+    </section>
+    {{ office_chart_payload|json_script:"an-office-data" }}
+    {% endif %}
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" crossorigin="anonymous"></script>
+<script>
+(function () {
+    function read(id) { var el = document.getElementById(id); return el ? JSON.parse(el.textContent || '{}') : {}; }
+    function mk(id, cfg) {
+        var el = document.getElementById(id); if (!el) return null;
+        return new Chart(el.getContext('2d'), cfg);
+    }
+    var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var tickColor = '#64748b';
+    var gridColor = 'rgba(226, 232, 240, 0.85)';
+    var trendP = read('an-trend-data');
+    if (trendP && trendP.labels && trendP.labels.length) {
+        var elQ = document.getElementById('anQuarterlyMetPct');
+        if (elQ) {
+            var nQ = trendP.labels.length;
+            var srcPct = trendP.met_pct_scored || [];
+            var rawPct = [];
+            for (var qi = 0; qi < nQ; qi++) {
+                rawPct.push(qi < srcPct.length ? srcPct[qi] : null);
+            }
+            var revealedMax = -1;
+            var pathDuration = reduceMotion ? 0 : 920;
+            var quarterlyAnim = { duration: pathDuration, easing: 'easeOutQuart' };
+            var chartQ = new Chart(elQ.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: trendP.labels,
+                    datasets: [{
+                        label: '% Met (scored)',
+                        data: reduceMotion ? rawPct.slice() : rawPct.map(function () { return null; }),
+                        borderColor: 'rgba(22, 163, 74, 1)',
+                        backgroundColor: 'rgba(22, 163, 74, 0.14)',
+                        fill: true,
+                        borderWidth: 2.5,
+                        pointRadius: function (ctx) {
+                            if (reduceMotion) return 5;
+                            var i = ctx.dataIndex;
+                            if (i > revealedMax) return 0;
+                            if (rawPct[i] == null || rawPct[i] === '') return 4;
+                            return 7;
+                        },
+                        pointHoverRadius: 9,
+                        pointBackgroundColor: 'rgba(21, 128, 61, 1)',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        tension: 0.35,
+                        spanGaps: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: quarterlyAnim,
+                    animations: reduceMotion ? {} : {
+                        numbers: {
+                            type: 'number',
+                            properties: ['x', 'y', 'low', 'high'],
+                            easing: 'easeOutQuart',
+                            duration: pathDuration
+                        }
+                    },
+                    layout: { padding: { top: 22, right: 10, bottom: 6, left: 4 } },
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { position: 'bottom', labels: { usePointStyle: true, padding: 14, font: { size: 12, weight: '600' }, color: tickColor } },
+                        tooltip: {
+                            callbacks: {
+                                label: function (ctx) {
+                                    var i = ctx.dataIndex;
+                                    var pct = trendP.met_pct_scored && trendP.met_pct_scored[i];
+                                    if (pct == null || pct === undefined) return ' % Met (scored): — (no scored rows)';
+                                    return ' % Met (scored): ' + pct + '%';
+                                },
+                                afterBody: function (items) {
+                                    if (!items.length) return [];
+                                    var i = items[0].dataIndex;
+                                    var m = (trendP.met && trendP.met[i]) || 0;
+                                    var u = (trendP.unmet && trendP.unmet[i]) || 0;
+                                    var p = (trendP.pending && trendP.pending[i]) || 0;
+                                    return ['Met: ' + m + ' · Unmet: ' + u + ' · Pending: ' + p];
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            min: 0,
+                            suggestedMax: 100,
+                            grace: '10%',
+                            ticks: {
+                                callback: function (v) {
+                                    if (typeof v === 'number' && v > 100) return '';
+                                    return v + '%';
+                                },
+                                font: { size: 11 },
+                                color: tickColor
+                            },
+                            title: { display: true, text: '% Met (scored)', font: { size: 12, weight: '600' }, color: tickColor },
+                            grid: { color: gridColor }
+                        },
+                        x: {
+                            ticks: { font: { size: 11, weight: '600' }, color: tickColor },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+            if (!reduceMotion) {
+                var qIx = 0;
+                var stepMs = 200;
+                function revealQuarter() {
+                    if (qIx >= nQ) {
+                        revealedMax = nQ - 1;
+                        chartQ.options.animation = { duration: 480, easing: 'easeOutQuart' };
+                        chartQ.update();
+                        return;
+                    }
+                    chartQ.data.datasets[0].data[qIx] = rawPct[qIx];
+                    revealedMax = qIx;
+                    chartQ.update();
+                    qIx += 1;
+                    setTimeout(revealQuarter, stepMs);
+                }
+                setTimeout(revealQuarter, 380);
+            }
+        }
+    }
+    var areaP = read('an-area-status-data');
+    if (areaP && areaP.labels && areaP.labels.length) {
+        var pend = areaP.pending || areaP.labels.map(function () { return 0; });
+        var nDatasets = 2;
+        mk('anAreaStatusStack', {
+            type: 'bar',
+            data: {
+                labels: areaP.labels,
+                datasets: [
+                    {
+                        label: 'Met',
+                        data: areaP.met || [],
+                        backgroundColor: 'rgba(22, 163, 74, 0.88)',
+                        borderColor: 'rgba(21, 128, 61, 1)',
+                        borderWidth: 1,
+                        stack: 'area'
+                    },
+                    {
+                        label: 'Unmet',
+                        data: areaP.unmet || [],
+                        backgroundColor: 'rgba(220, 38, 38, 0.88)',
+                        borderColor: 'rgba(185, 28, 28, 1)',
+                        borderWidth: 1,
+                        stack: 'area'
+                    }
+                ]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: reduceMotion ? { duration: 0 } : { duration: 1250, easing: 'easeOutQuart' },
+                animations: reduceMotion ? {} : {
+                    numbers: {
+                        type: 'number',
+                        properties: ['x', 'y', 'width', 'height'],
+                        duration: 1250,
+                        easing: 'easeOutQuart'
+                    }
+                },
+                layout: { padding: { top: 4, right: 8, bottom: 8, left: 4 } },
+                events: ['click', 'touchend'],
+                interaction: { mode: 'index', intersect: false, axis: 'y' },
+                onClick: function (evt, _els, chart) {
+                    var opts = { intersect: false, axis: 'y' };
+                    var pts = chart.getElementsAtEventForMode(evt, 'index', opts, true);
+                    if (!pts.length) {
+                        chart.setActiveElements([]);
+                        chart.update();
+                        return;
+                    }
+                    var ix = pts[0].index;
+                    var active = [];
+                    for (var d = 0; d < nDatasets; d++) {
+                        active.push({ datasetIndex: d, index: ix });
+                    }
+                    var px = typeof evt.x === 'number' ? evt.x : evt.native.offsetX;
+                    var py = typeof evt.y === 'number' ? evt.y : evt.native.offsetY;
+                    chart.setActiveElements(active, { x: px, y: py });
+                    chart.update();
+                },
+                plugins: {
+                    legend: { position: 'bottom', labels: { usePointStyle: true, padding: 14, font: { size: 12, weight: '600' }, color: tickColor } },
+                    tooltip: {
+                        position: 'nearest',
+                        callbacks: {
+                            title: function (items) {
+                                if (!items || !items.length) return '';
+                                var i = items[0].dataIndex;
+                                return areaP.labels && areaP.labels[i] != null ? String(areaP.labels[i]) : '';
+                            },
+                            afterBody: function (items) {
+                                if (!items.length) return [];
+                                var i = items[0].dataIndex;
+                                var lines = (areaP.dev_area_lines && areaP.dev_area_lines[i]) || [];
+                                if (!lines.length) {
+                                    return ['', 'Development areas:', '  (no label text in hierarchy)'];
+                                }
+                                var out = ['', 'Development areas (distinct labels for this pillar):'];
+                                for (var k = 0; k < lines.length; k++) {
+                                    out.push('  • ' + lines[k]);
+                                }
+                                return out;
+                            },
+                            footer: function (items) {
+                                if (!items.length) return '';
+                                var i = items[0].dataIndex;
+                                var p = pend[i] != null ? pend[i] : 0;
+                                var m = areaP.met[i] || 0;
+                                var u = areaP.unmet[i] || 0;
+                                return 'Pending: ' + p + ' · Total rows: ' + (m + u + p);
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        stacked: true,
+                        beginAtZero: true,
+                        ticks: { precision: 0, font: { size: 11 }, color: tickColor },
+                        title: { display: true, text: 'Indicator rows (count)', font: { size: 12, weight: '600' }, color: tickColor },
+                        grid: { color: gridColor }
+                    },
+                    y: {
+                        stacked: true,
+                        ticks: {
+                            font: { size: 11, weight: '600' },
+                            color: tickColor,
+                            autoSkip: false,
+                            maxRotation: 0,
+                            minRotation: 0
+                        },
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+    }
+    var offP = read('an-office-data');
+    if (offP && offP.labels && offP.labels.length) {
+        var pendingArr = offP.pending || offP.labels.map(function () { return 0; });
+        var barAnim = reduceMotion
+            ? { duration: 0 }
+            : {
+                duration: 1050,
+                easing: 'easeOutCubic',
+                delay: function (ctx) {
+                    if (!ctx || ctx.type !== 'data' || ctx.mode !== 'default') return 0;
+                    var di = typeof ctx.dataIndex === 'number' ? ctx.dataIndex : 0;
+                    var ds = typeof ctx.datasetIndex === 'number' ? ctx.datasetIndex : 0;
+                    return di * 75 + ds * 40;
+                }
+            };
+        var barAnimSimple = reduceMotion ? { duration: 0 } : { duration: 1000, easing: 'easeOutQuart' };
+        mk('anOfficeVol', {
+            type: 'bar',
+            data: {
+                labels: offP.labels,
+                datasets: [
+                    { label: 'Met', data: offP.met || [], backgroundColor: 'rgba(22,163,74,.86)' },
+                    { label: 'Unmet', data: offP.unmet || [], backgroundColor: 'rgba(220,38,38,.86)' },
+                    { label: 'Pending', data: pendingArr, backgroundColor: 'rgba(148,163,184,.75)' }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: barAnim,
+                plugins: { legend: { labels: { color: tickColor } } },
+                scales: {
+                    x: { stacked: true, ticks: { color: tickColor }, grid: { color: gridColor } },
+                    y: { stacked: true, beginAtZero: true, ticks: { precision: 0, color: tickColor }, grid: { display: false } }
+                }
+            }
+        });
+        function mountOfficeRate() {
+            mk('anOfficeRate', {
+                type: 'bar',
+                data: { labels: offP.labels, datasets: [{ label: '% Met', data: offP.met_pct || [], backgroundColor: 'rgba(22, 163, 74, 0.78)', borderColor: 'rgba(21, 128, 61, 0.9)', borderWidth: 1 }] },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: reduceMotion ? { duration: 0 } : {
+                        duration: 980,
+                        easing: 'easeOutQuart',
+                        delay: function (ctx) {
+                            if (!ctx || ctx.type !== 'data' || ctx.mode !== 'default') return 0;
+                            return (typeof ctx.dataIndex === 'number' ? ctx.dataIndex : 0) * 85;
+                        }
+                    },
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { min: 0, max: 100, ticks: { callback: function (v) { return v + '%'; }, color: tickColor }, grid: { color: gridColor } },
+                        y: { ticks: { color: tickColor }, grid: { display: false } }
+                    }
+                }
+            });
+        }
+        if (reduceMotion) {
+            mountOfficeRate();
+        } else {
+            setTimeout(mountOfficeRate, 220);
+        }
+    }
+})();
+</script>
+{% endblock %}

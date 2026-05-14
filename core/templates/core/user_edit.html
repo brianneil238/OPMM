@@ -1,0 +1,32 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container-fluid" style="max-width: 720px;">
+    <div class="mb-3">
+        <a href="{% url 'user_management' %}" class="small text-muted text-decoration-none"><i class="fas fa-arrow-left me-1"></i> Back to user management</a>
+    </div>
+    <div class="card border-0 shadow-sm p-4" style="border-radius: 16px;">
+        <h5 class="fw-bold mb-1">Edit office account</h5>
+        <p class="text-muted small mb-4">Full name must stay in sync with the <strong>Office</strong> record so dashboards resolve the correct office.</p>
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="small fw-bold text-muted">Full office name</label>
+                <input type="text" name="full_name" class="form-control border-0 bg-light py-2" value="{{ staff.first_name }}" required>
+            </div>
+            <div class="mb-3">
+                <label class="small fw-bold text-muted">Abbreviation (login username)</label>
+                <input type="text" name="abbreviation" class="form-control border-0 bg-light py-2" value="{{ staff.username }}" required maxlength="150">
+            </div>
+            <div class="mb-4">
+                <label class="small fw-bold text-muted">New password <span class="fw-normal">(optional)</span></label>
+                <input type="password" name="password" class="form-control border-0 bg-light py-2" placeholder="Leave blank to keep current password" autocomplete="new-password">
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+                <button type="submit" class="btn btn-primary fw-bold border-0 shadow-sm px-4 rounded-3">Save changes</button>
+                <a href="{% url 'user_management' %}" class="btn btn-light border rounded-pill px-4 fw-bold">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

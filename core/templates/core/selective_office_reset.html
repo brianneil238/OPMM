@@ -1,0 +1,226 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="px-2" style="max-width: 1100px;">
+    {% if form_error %}
+    <div class="alert alert-danger border-0 small shadow-sm mb-3" style="border-radius: 12px;">
+        {{ form_error }}
+    </div>
+    {% endif %}
+
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+        <div>
+            <h4 class="fw-bold text-dark mb-1"><i class="fas fa-building me-2 text-primary"></i>Remove office data</h4>
+            <p class="text-muted small mb-0">Choose one or more offices, review exactly what will be removed, then confirm. User accounts and office names are kept; only ingested PAPs, indicators, and performance rows for those offices are deleted (same scope as each office&rsquo;s &ldquo;Clear office data&rdquo; action).</p>
+        </div>
+    </div>
+
+    {{ offices_meta|json_script:"offices-meta-json" }}
+
+    <form method="post" id="selective-delete-form">
+        {% csrf_token %}
+        <div class="card border-0 shadow-sm mb-4" style="border-radius: 16px;">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 3rem;" class="ps-3">
+                                    <span class="visually-hidden">Select</span>
+                                </th>
+                                <th>Office</th>
+                                <th class="text-end">PAPs</th>
+                                <th class="text-end">Indicators</th>
+                                <th class="text-end">Performance rows</th>
+                                <th class="d-none d-md-table-cell">Sample PAP titles</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in offices_rows %}
+                            <tr class="{% if row.pap_count == 0 %}text-muted{% endif %}">
+                                <td class="ps-3">
+                                    <input class="form-check-input office-cb" type="checkbox" name="office_ids" value="{{ row.office.id }}"
+                                           {% if row.office.id in selected_ids %}checked{% endif %}
+                                           {% if row.pap_count == 0 %}disabled title="No ingested data for this office"{% endif %}>
+                                </td>
+                                <td class="fw-semibold">{{ row.office.name }}</td>
+                                <td class="text-end">{{ row.pap_count }}</td>
+                                <td class="text-end">{{ row.indicator_count }}</td>
+                                <td class="text-end">{{ row.record_count }}</td>
+                                <td class="d-none d-md-table-cell small text-muted">
+                                    {% if row.pap_samples %}
+                                        {% for t in row.pap_samples|slice:":4" %}{{ t|truncatechars:40 }}{% if not forloop.last %} · {% endif %}{% endfor %}
+                                        {% if row.pap_count > 4 %}…{% endif %}
+                                    {% else %}—{% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="6" class="text-center text-muted py-4">No offices defined yet.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2 mb-3">
+            <button type="button" class="btn btn-outline-primary" id="btn-select-with-data">Select offices with data</button>
+            <button type="button" class="btn btn-outline-secondary" id="btn-clear-selection">Clear selection</button>
+        </div>
+
+        <div class="d-grid gap-2 mb-3">
+            <button type="button" class="btn btn-danger btn-lg fw-bold py-3 shadow-sm" style="border-radius: 12px;" id="btn-open-confirm-modal" disabled>
+                <i class="fas fa-eye me-2"></i>Review selected offices &amp; confirm deletion
+            </button>
+        </div>
+
+        <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-scrollable modal-lg">
+                <div class="modal-content" style="border-radius: 16px;">
+                    <div class="modal-header border-0 pb-0">
+                        <h5 class="modal-title fw-bold text-danger" id="confirmDeleteModalLabel"><i class="fas fa-triangle-exclamation me-2"></i>Confirm permanent deletion</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="small text-muted mb-3">You are about to delete <strong>only</strong> the ingested strategic data below. This cannot be undone.</p>
+                        <div id="modal-delete-preview" class="border rounded-3 p-3 bg-light small mb-3" style="max-height: 280px; overflow-y: auto;"></div>
+                        <label class="form-label fw-bold small">Type <code class="text-danger">DELETE</code> to confirm</label>
+                        <input type="text" name="confirm_phrase" id="confirm_phrase_input" class="form-control form-control-lg mb-2" placeholder="DELETE" autocomplete="off" autocapitalize="characters">
+                        <p class="text-muted small mb-0">The confirmation field is required so removals are never one-click accidents.</p>
+                    </div>
+                    <div class="modal-footer border-0 pt-0">
+                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger rounded-pill px-4 fw-bold" id="modal-submit-delete">Remove selected data</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <div class="card border-danger border-2 mt-5 mb-4" style="border-radius: 16px;">
+        <div class="card-body">
+            <h6 class="fw-bold text-danger mb-2"><i class="fas fa-bomb me-2"></i>Nuclear option — all offices</h6>
+            <p class="small text-muted mb-3">Deletes <strong>every</strong> performance row, indicator, and strategic level in the database (all offices). Use only when you truly need a full reset.</p>
+            <form method="post" action="{% url 'clear_all_data' %}" onsubmit="return confirm('This will wipe ALL strategic data for ALL offices. Continue?');">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-danger fw-bold"><i class="fas fa-bomb me-2"></i>Clear entire database</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    var metaEl = document.getElementById('offices-meta-json');
+    var meta = {};
+    try {
+        meta = metaEl ? JSON.parse(metaEl.textContent) : {};
+    } catch (e) {}
+
+    var modalEl = document.getElementById('confirmDeleteModal');
+    var previewEl = document.getElementById('modal-delete-preview');
+    var confirmInput = document.getElementById('confirm_phrase_input');
+    var btnOpen = document.getElementById('btn-open-confirm-modal');
+    var form = document.getElementById('selective-delete-form');
+    var modalInstance = null;
+
+    function getModal() {
+        if (!modalEl || typeof bootstrap === 'undefined') return null;
+        if (!modalInstance) {
+            modalInstance = new bootstrap.Modal(modalEl);
+        }
+        return modalInstance;
+    }
+
+    function selectedIds() {
+        return Array.prototype.slice.call(document.querySelectorAll('.office-cb:checked')).map(function (cb) { return cb.value; });
+    }
+
+    function updateOpenButton() {
+        if (!btnOpen) return;
+        btnOpen.disabled = selectedIds().length === 0;
+    }
+
+    function buildPreviewHtml(ids) {
+        if (!ids.length) {
+            return '<p class="text-muted mb-0">No offices selected.</p>';
+        }
+        var parts = [];
+        ids.forEach(function (id) {
+            var row = meta[id];
+            if (!row) return;
+            var samples = (row.samples || []).map(function (s) {
+                return '<li class="mb-1">' + String(s).replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</li>';
+            }).join('');
+            parts.push(
+                '<div class="mb-3 pb-3 border-bottom">' +
+                '<div class="fw-bold text-dark">' + String(row.name).replace(/</g, '&lt;') + '</div>' +
+                '<ul class="list-unstyled small mb-2 mt-1">' +
+                '<li><span class="text-muted">PAPs to remove:</span> <strong>' + row.pap_count + '</strong></li>' +
+                '<li><span class="text-muted">Indicators:</span> <strong>' + row.indicator_count + '</strong></li>' +
+                '<li><span class="text-muted">Performance rows:</span> <strong>' + row.record_count + '</strong></li>' +
+                '</ul>' +
+                (samples ? '<div class="text-muted text-uppercase fw-bold" style="font-size:0.65rem;letter-spacing:0.06em;">Sample PAP titles</div><ul class="small ps-3 mb-0">' + samples + '</ul>' : '') +
+                '</div>'
+            );
+        });
+        return parts.join('') || '<p class="text-muted mb-0">Nothing to preview.</p>';
+    }
+
+    document.querySelectorAll('.office-cb').forEach(function (cb) {
+        cb.addEventListener('change', updateOpenButton);
+    });
+
+    var btnSel = document.getElementById('btn-select-with-data');
+    if (btnSel) {
+        btnSel.addEventListener('click', function () {
+            document.querySelectorAll('.office-cb').forEach(function (cb) {
+                if (!cb.disabled) {
+                    var cells = cb.closest('tr').querySelectorAll('td');
+                    var papCell = cells.length > 2 ? cells[2].textContent.trim() : '0';
+                    cb.checked = parseInt(papCell, 10) > 0;
+                }
+            });
+            updateOpenButton();
+        });
+    }
+
+    var btnClr = document.getElementById('btn-clear-selection');
+    if (btnClr) {
+        btnClr.addEventListener('click', function () {
+            document.querySelectorAll('.office-cb').forEach(function (cb) { cb.checked = false; });
+            updateOpenButton();
+        });
+    }
+
+    if (btnOpen) {
+        btnOpen.addEventListener('click', function () {
+            var ids = selectedIds();
+            if (!ids.length) return;
+            if (previewEl) previewEl.innerHTML = buildPreviewHtml(ids);
+            if (confirmInput) confirmInput.value = '';
+            var m = getModal();
+            if (m) m.show();
+        });
+    }
+
+    if (form) {
+        form.addEventListener('submit', function (ev) {
+            if ((confirmInput.value || '').trim() !== 'DELETE') {
+                ev.preventDefault();
+                alert('Type DELETE (all caps) in the confirmation box to proceed.');
+                return false;
+            }
+        });
+    }
+
+    if (modalEl) {
+        modalEl.addEventListener('hidden.bs.modal', function () {
+            if (confirmInput) confirmInput.value = '';
+        });
+    }
+
+    updateOpenButton();
+})();
+</script>
+{% endblock %}

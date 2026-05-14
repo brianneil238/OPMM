@@ -1,0 +1,71 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container-fluid d-flex justify-content-center align-items-center" style="min-height: 70vh;">
+    <div class="col-md-5">
+        <div class="card border-0 shadow-lg p-5" style="border-radius: 20px; background: white;">
+            <div class="text-center mb-4">
+                <div class="mb-3">
+                    <i class="fas fa-file-upload fa-3x text-primary opacity-50"></i>
+                </div>
+                <h4 class="fw-bold text-dark">Direct Data Ingestion</h4>
+                <p class="text-muted small">Upload one or more institutional blueprints (<strong>.docx</strong> or <strong>.xlsx</strong>) to begin auto-parsing.</p>
+            </div>
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <div class="mb-4">
+                    <label class="small fw-bold text-muted text-uppercase mb-2">Select blueprint file(s)</label>
+                    <input type="file" name="blueprint" accept=".docx,.xlsx,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" class="form-control border-0 bg-light py-2" style="border-radius: 10px;" multiple required>
+                    <div class="form-text small text-muted mt-1">Hold Ctrl (Windows) or Command (Mac) to choose multiple files. The same reporting quarter and year apply to every file in this batch.</div>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="small fw-bold text-muted text-uppercase mb-2">Reporting quarter</label>
+                        <select name="ingest_quarter" class="form-select border-0 bg-light" style="border-radius: 10px;">
+                            <option value="">Auto-detect from document</option>
+                            <option value="1">Quarter 1</option>
+                            <option value="2">Quarter 2</option>
+                            <option value="3">Quarter 3</option>
+                            <option value="4">Quarter 4</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="small fw-bold text-muted text-uppercase mb-2">Reporting year</label>
+                        <input type="number" name="ingest_year" class="form-control border-0 bg-light py-2" style="border-radius: 10px;"
+                               placeholder="e.g. 2025 (optional)" min="2000" max="2099" step="1">
+                    </div>
+                </div>
+                <p class="text-muted small mb-4">
+                    Auto-detect reads only each document’s title (Word) or the first three worksheet rows (Excel), not the data rows, so text like &ldquo;Q4&rdquo; in accomplishment cells cannot skew the period. If you still get the wrong quarter, choose it explicitly here for this whole batch.
+                </p>
+
+                {% if success_count %}
+                <div class="alert alert-success border-0 small mb-3" style="border-radius: 10px;">
+                    Successfully ingested <strong>{{ success_count }}</strong> file{{ success_count|pluralize }}.
+                </div>
+                {% endif %}
+                {% if failure_details %}
+                <div class="alert alert-warning border-0 small mb-4" style="border-radius: 10px;">
+                    <div class="fw-bold mb-1">Some files could not be ingested:</div>
+                    <ul class="mb-0 ps-3">
+                        {% for name, err in failure_details %}
+                        <li><strong>{{ name }}</strong> — {{ err }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+                {% if error %}
+                <div class="alert alert-danger border-0 small mb-4" style="border-radius: 10px;">{{ error }}</div>
+                {% endif %}
+
+                <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold py-3 shadow-sm border-0 rounded-3">
+                    Run Migration
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

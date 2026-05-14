@@ -1,0 +1,286 @@
+{% if viewer_popup_announcement %}
+<div id="sopm-viewer-announcement-popup" class="sopm-viewer-announcement-popup" role="dialog" aria-modal="false" aria-labelledby="sopm-viewer-ann-title" data-announcement-id="{{ viewer_popup_announcement.pk }}">
+    <div class="sopm-viewer-announcement-popup__inner">
+        <button type="button" class="btn-close sopm-viewer-announcement-popup__close" aria-label="Close announcement"></button>
+        <div class="sopm-viewer-announcement-popup__eyebrow"><i class="fas fa-bullhorn me-1" aria-hidden="true"></i> Announcement</div>
+        <h2 class="sopm-viewer-announcement-popup__title mb-2" id="sopm-viewer-ann-title">{{ viewer_popup_announcement.title }}</h2>
+        <div class="sopm-viewer-announcement-popup__body">{{ viewer_popup_announcement.body|linebreaksbr }}</div>
+    </div>
+</div>
+{% endif %}
+<div class="viewer-dashboard-hero viewer-card d-flex flex-column gap-3 mb-3">
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+        <div>
+            <div class="viewer-eyebrow mb-1">OPMM Viewer</div>
+            <div class="viewer-headline mb-0">
+                {% if view_all_quarters %}FY {{ year }} — All quarters{% else %}Q{{ quarter }} {{ year }}{% endif %}
+            </div>
+            <div class="text-muted small mt-1 mb-0" style="max-width: 42rem;">
+                {% if view_all_quarters %}Performance across all ingested quarters for this view.{% else %}Performance summary for the selected quarter.{% endif %}
+                {% if selected_office_name %}<span class="d-block mt-1">{{ selected_office_name }}</span>{% elif combined_offices %}<span class="d-block mt-1">All offices (combined)</span>{% endif %}
+            </div>
+        </div>
+    </div>
+    {% if selected_record %}
+    <div class="viewer-focus-banner rounded-3 border px-3 py-2 d-flex flex-wrap align-items-center justify-content-between gap-2"
+         style="background: linear-gradient(180deg, #fffdfd 0%, #f8fafc 100%); border-color: #e8d4d6 !important;">
+        <div class="d-flex align-items-start gap-2 min-w-0">
+            <span class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                  style="width: 36px; height: 36px; background: rgba(192, 0, 0, 0.1); color: #c00000;">
+                <i class="fas fa-bullseye" aria-hidden="true"></i>
+            </span>
+            <div class="min-w-0">
+                <div class="text-uppercase fw-bold mb-0" style="font-size: 0.62rem; letter-spacing: 0.08em; color: #64748b;">Focused target</div>
+                {% if indicator_focus_active %}
+                <div class="text-muted" style="font-size: 0.68rem;">Matrix shows only this indicator; all other rows are hidden.</div>
+                {% endif %}
+                <div class="fw-semibold text-dark small">{{ selected_record.indicator.description }}</div>
+                {% if selected_record.indicator.pap %}
+                <div class="text-muted" style="font-size: 0.72rem;">{{ selected_record.indicator.pap.name }}</div>
+                {% endif %}
+            </div>
+        </div>
+        <a href="#" class="btn btn-sm btn-outline-secondary rounded-pill fw-semibold flex-shrink-0 text-decoration-none"
+           hx-get="?year={{ year }}&quarter={% if view_all_quarters %}all{% else %}{{ quarter }}{% endif %}{% if office_id %}&office={{ office_id }}{% endif %}&area={{ selected_area_id }}{% if status_filter != 'all' %}&status={{ status_filter }}{% endif %}"
+           hx-target="#viewer-area"
+           hx-push-url="true">
+            <i class="fas fa-times me-1"></i> Clear focus
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<div class="viewer-kpi-period-band mb-3">
+    <div class="viewer-kpi-strip" role="group" aria-label="Performance summary">
+        <div class="viewer-kpi-pill viewer-kpi-pill--total">
+            <div class="viewer-kpi-pill-visual" aria-hidden="true">
+                <div class="viewer-target-ring viewer-kpi-pill-ring" style="--pct: 100;"><div class="viewer-target-ring-inner">{{ total }}</div></div>
+            </div>
+            <div class="viewer-kpi-pill-body">
+                <span class="viewer-kpi-pill-label">Total targets</span>
+                <span class="viewer-kpi-pill-value">{{ total }}</span>
+                <span class="viewer-kpi-pill-meta">{{ period_label }} · FY {{ year }}</span>
+            </div>
+        </div>
+        <a href="#" class="viewer-kpi-pill viewer-kpi-pill--met text-decoration-none {% if status_filter == 'met' %}viewer-kpi-pill-active{% endif %}"
+           hx-get="?year={{ year }}&quarter={% if view_all_quarters %}all{% else %}{{ quarter }}{% endif %}{% if office_id %}&office={{ office_id }}{% endif %}&area={{ selected_area_id }}&status={% if status_filter == 'met' %}all{% else %}met{% endif %}"
+           hx-target="#viewer-area" hx-push-url="true">
+            <div class="viewer-kpi-pill-visual" aria-hidden="true">
+                <span class="viewer-kpi-pill-ico met"><i class="fas fa-check"></i></span>
+            </div>
+            <div class="viewer-kpi-pill-body">
+                <span class="viewer-kpi-pill-label">Met</span>
+                <span class="viewer-kpi-pill-value met">{{ met }}</span>
+                <span class="viewer-kpi-pill-meta">{{ met_pct }}% of total</span>
+            </div>
+        </a>
+        <a href="#" class="viewer-kpi-pill viewer-kpi-pill--unmet text-decoration-none {% if status_filter == 'unmet' %}viewer-kpi-pill-active{% endif %}"
+           hx-get="?year={{ year }}&quarter={% if view_all_quarters %}all{% else %}{{ quarter }}{% endif %}{% if office_id %}&office={{ office_id }}{% endif %}&area={{ selected_area_id }}&status={% if status_filter == 'unmet' %}all{% else %}unmet{% endif %}"
+           hx-target="#viewer-area" hx-push-url="true">
+            <div class="viewer-kpi-pill-visual" aria-hidden="true">
+                <span class="viewer-kpi-pill-ico unmet"><i class="fas fa-triangle-exclamation"></i></span>
+            </div>
+            <div class="viewer-kpi-pill-body">
+                <span class="viewer-kpi-pill-label">Unmet</span>
+                <span class="viewer-kpi-pill-value unmet">{{ unmet }}</span>
+                <span class="viewer-kpi-pill-meta">{{ unmet_pct }}% of total</span>
+            </div>
+        </a>
+        <div class="viewer-kpi-pill viewer-kpi-pill--overall">
+            <div class="viewer-kpi-pill-visual" aria-hidden="true">
+                <div class="viewer-gauge viewer-kpi-pill-ring" style="--pct: {{ completion_pct }};"><div class="viewer-gauge-inner">{{ completion_pct }}%</div></div>
+            </div>
+            <div class="viewer-kpi-pill-body">
+                <span class="viewer-kpi-pill-label">Overall</span>
+                <span class="viewer-kpi-pill-value">{{ completion_pct }}%</span>
+                <span class="viewer-kpi-pill-meta">{{ met }} of {{ total }} met</span>
+            </div>
+        </div>
+    </div>
+    <div class="viewer-kpi-filters-wrap">
+        {% if user.is_superuser and available_offices %}
+        <div class="viewer-kpi-office-rail">
+            <label class="viewer-filter-label mb-0" for="viewer-office-select"><i class="fas fa-building me-1"></i> Office</label>
+            <select id="viewer-office-select" name="office" class="form-select form-select-sm viewer-office-select"
+                    onchange="(function (el) { var a = document.getElementById('viewer-dev-area-select'); var area = a ? encodeURIComponent(a.value || 'all') : 'all'; var q = '?year={{ year }}&quarter={% if view_all_quarters %}all{% else %}{{ quarter }}{% endif %}&area=' + area; if (el.value) { q += '&office=' + encodeURIComponent(el.value); } q += '{% if status_filter != 'all' %}&status={{ status_filter }}{% endif %}'; htmx.ajax('GET', q, { target: '#viewer-area', pushUrl: true }); })(this);">
+                <option value="" {% if not office_id %}selected{% endif %}>All offices (combined)</option>
+                {% for o in available_offices %}
+                <option value="{{ o.id }}" {% if office_id == o.id %}selected{% endif %}>{{ o.name|truncatechars:64 }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <span class="viewer-kpi-filter-divider d-none d-md-block" aria-hidden="true"></span>
+        {% endif %}
+        <div class="viewer-kpi-area-rail">
+            <label class="viewer-filter-label mb-0" for="viewer-dev-area-select"><i class="fas fa-layer-group me-1"></i> Development area</label>
+            <select id="viewer-dev-area-select" name="area" class="form-select form-select-sm viewer-dev-area-select"
+                    onchange="(function (el) { var off = document.getElementById('viewer-office-select'); var q = '?year={{ year }}&quarter={% if view_all_quarters %}all{% else %}{{ quarter }}{% endif %}&area=' + encodeURIComponent(el.value || 'all'); if (off && off.value) { q += '&office=' + encodeURIComponent(off.value); } q += '{% if status_filter != 'all' %}&status={{ status_filter }}{% endif %}'; htmx.ajax('GET', q, { target: '#viewer-area', pushUrl: true }); })(this);">
+                <option value="all" {% if selected_area_id == 'all' %}selected{% endif %}>All development areas</option>
+                {% for area in development_areas %}
+                <option value="{{ area.id }}" {% if area.id == selected_area_id %}selected{% endif %}>{{ area.name|truncatechars:72 }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <span class="viewer-kpi-period-divider d-none d-md-block" aria-hidden="true"></span>
+        <div class="viewer-kpi-period-rail">
+            <div class="viewer-filter-label mb-0"><i class="fas fa-sliders me-1"></i> Period</div>
+            <div class="viewer-filter-bar-inner">
+                <div class="viewer-tabs">
+                    <a href="#" class="viewer-tab {% if view_all_quarters %}active{% endif %}"
+                       hx-get="?year={{ year }}&quarter=all{% if office_id %}&office={{ office_id }}{% endif %}&area={{ selected_area_id }}{% if status_filter != 'all' %}&status={{ status_filter }}{% endif %}" hx-target="#viewer-area" hx-push-url="true">
+                       All
+                    </a>
+                    {% for q in quarter_options %}
+                    {% if q in available_quarters %}
+                    <a href="#" class="viewer-tab {% if not view_all_quarters and q == quarter %}active{% endif %}"
+                       hx-get="?year={{ year }}&quarter={{ q }}{% if office_id %}&office={{ office_id }}{% endif %}&area={{ selected_area_id }}{% if status_filter != 'all' %}&status={{ status_filter }}{% endif %}" hx-target="#viewer-area" hx-push-url="true">Q{{ q }}</a>
+                    {% else %}
+                    <span class="viewer-tab disabled" title="No data ingested for Q{{ q }}, FY {{ year }}">Q{{ q }}</span>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-light border rounded-pill fw-bold dropdown-toggle px-3" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        FY {{ year }}
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg">
+                        {% for y in available_years %}
+                        <li>
+                            <a class="dropdown-item small {% if y == year %}active bg-primary text-white{% endif %}" href="#"
+                               hx-get="?year={{ y }}&quarter={% if view_all_quarters %}all{% else %}{{ quarter }}{% endif %}{% if office_id %}&office={{ office_id }}{% endif %}&area={{ selected_area_id }}{% if status_filter != 'all' %}&status={{ status_filter }}{% endif %}" hx-target="#viewer-area" hx-push-url="true">
+                               FY {{ y }}
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-12">
+        <div class="viewer-card p-0 overflow-hidden">
+            <div class="viewer-table-toolbar px-3 pt-3 pb-2 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div>
+                    <div class="viewer-kpi-label mb-1"><i class="fas fa-table me-1 text-primary"></i> Indicator matrix</div>
+                    <div class="fw-bold text-dark small">{{ selected_area_name|default:"All development areas" }}</div>
+                </div>
+                <span class="text-muted small fw-bold text-end">
+                    {{ total_indicator_rows }} total
+                    {% if num_pages > 1 %}· page {{ page }} of {{ num_pages }}{% endif %}
+                    {% if indicator_row_items %}<span class="d-block text-muted" style="font-weight:600;">Rows {{ page_start_index|add:1 }}–{{ page_end_index }}</span>{% endif %}
+                </span>
+                <a class="btn btn-sm btn-outline-secondary rounded-pill fw-bold"
+                   href="{% url 'export_lpc_wide_excel' %}?year={{ year }}{% if office_id %}&office={{ office_id }}{% endif %}"
+                   download
+                   title="Full FY download: all quarters, all development areas, and all Met/Unmet/Pending rows (Office filter still applies).">
+                    <i class="fas fa-file-excel me-1 text-success"></i> Export LPC Excel
+                </a>
+            </div>
+            <div class="viewer-table-wrap">
+                <table class="viewer-table">
+                    <thead>
+                        <tr>
+                            <th class="row-num"></th>
+                            {% if view_all_quarters %}<th class="viewer-th-quarter">Quarter</th>{% endif %}
+                            <th class="viewer-th-outcome">Outcome</th>
+                            <th class="viewer-th-strategy">Strategy</th>
+                            <th class="viewer-th-pap">PAP <span class="viewer-th-sub">(programs / activities / projects)</span></th>
+                            <th class="viewer-th-indicator">Indicator <span class="viewer-th-sub">(KPI under PAP)</span></th>
+                            {% if combined_offices %}<th class="viewer-th-office">Office</th>{% endif %}
+                            <th class="viewer-th-num viewer-th-target">Target</th>
+                            <th class="viewer-th-accomplishment">Actual accomplishments</th>
+                            <th class="viewer-th-variance" title="Variance vs. quantitative target">Variance <span class="viewer-th-sub">(vs. target)</span></th>
+                            <th class="viewer-th-status">Met / Unmet</th>
+                            <th class="viewer-th-remarks">Remarks</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in indicator_row_items %}
+                        {% with record=row.record %}
+                        <tr class="viewer-matrix-row viewer-outcome-band-{{ row.outcome_band_idx }} viewer-matrix-tone-{{ row.matrix_row_tone }}{% if row.pap_group_start %} viewer-pap-group-start{% endif %}{% if selected_record and record.pk == selected_record.pk %} active{% endif %}"
+                            data-record-pk="{{ record.pk }}"
+                            hx-get="{% url 'performance_viewer_indicator_detail' record.pk %}"
+                            hx-target="#viewer-indicator-modal-body"
+                            hx-swap="innerHTML"
+                            hx-push-url="false"
+                            hx-on:click="document.querySelectorAll('#viewer-area .viewer-table tbody tr').forEach(function (el) { el.classList.remove('active'); }); this.classList.add('active');">
+                            <td class="row-num">{{ page_start_index|add:forloop.counter }}</td>
+                            {% if view_all_quarters %}<td><span class="viewer-quarter-tag">Q{{ record.quarter }}</span></td>{% endif %}
+                            {% if row.outcome_rowspan %}
+                            <td rowspan="{{ row.outcome_rowspan }}" class="viewer-cell-text viewer-matrix-parent viewer-matrix-outcome">{{ row.outcome_text }}</td>
+                            {% endif %}
+                            {% if row.strategy_rowspan %}
+                            <td rowspan="{{ row.strategy_rowspan }}" class="viewer-cell-text viewer-matrix-parent viewer-matrix-strategy">{{ row.strategy_text }}</td>
+                            {% endif %}
+                            {% if row.pap_rowspan %}
+                            <td rowspan="{{ row.pap_rowspan }}" class="viewer-cell-text viewer-matrix-parent viewer-matrix-pap">
+                                {% if row.pap_kpi_total > 1 %}
+                                <div class="viewer-pap-kpi-stack" aria-label="Indicator count for this PAP">
+                                    <span class="viewer-pap-kpi-count">{{ row.pap_kpi_total }} indicators</span>
+                                    <span class="viewer-pap-kpi-hint">each row below is one KPI</span>
+                                </div>
+                                {% endif %}
+                                <div class="viewer-pap-title">{{ row.pap_text }}</div>
+                            </td>
+                            {% endif %}
+                            <td class="viewer-cell-text viewer-cell-indicator">
+                                {% if row.pap_kpi_total > 1 %}
+                                <span class="viewer-kpi-order-badge" title="KPI position under this PAP">{{ row.pap_kpi_index }} / {{ row.pap_kpi_total }}</span>
+                                {% endif %}
+                                <span class="viewer-indicator-desc">{{ record.indicator.description }}</span>
+                            </td>
+                            {% if combined_offices %}
+                            <td class="viewer-office-cell">{{ record.indicator.pap.office.name|default:"—" }}</td>
+                            {% endif %}
+                            <td class="viewer-cell-num">{% if record.target_value is not None %}{{ record.target_value|floatformat:"-2" }}{% else %}—{% endif %}</td>
+                            <td class="viewer-cell-text viewer-cell-accomplishment">
+                                {% if record.matrix_accomplishment %}
+                                    {{ record.matrix_accomplishment|linebreaksbr }}
+                                {% elif record.actual_value is not None %}
+                                    {{ record.actual_value|floatformat:"-2" }}
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
+                            <td class="viewer-cell-variance {{ row.variance_cell_class }}">{{ record.variance_text|default:"—" }}</td>
+                            <td class="viewer-cell-status">
+                                {% if record.status == 'MET' %}<span class="viewer-status-met viewer-status-block">Met</span>
+                                {% elif record.status == 'UNMET' %}<span class="viewer-status-unmet viewer-status-block">Unmet</span>
+                                {% else %}<span class="viewer-status-pending viewer-status-block">Pending</span>{% endif %}
+                            </td>
+                            <td class="viewer-cell-text viewer-cell-remarks">
+                                {% if record.matrix_remarks %}{{ record.matrix_remarks|linebreaksbr }}{% else %}—{% endif %}
+                            </td>
+                        </tr>
+                        {% endwith %}
+                        {% empty %}
+                        <tr><td colspan="{{ viewer_table_colspan }}" class="viewer-empty">No indicators for this view. Try another period.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% if num_pages > 1 %}
+            <div class="viewer-pagination px-3 py-2 border-top d-flex align-items-center justify-content-between flex-wrap gap-2">
+                {% if prev_page %}
+                <a href="#" class="btn btn-sm btn-outline-primary rounded-pill"
+                   hx-get="?year={{ year }}&quarter={% if view_all_quarters %}all{% else %}{{ quarter }}{% endif %}{% if office_id %}&office={{ office_id }}{% endif %}&area={{ selected_area_id }}&page={{ prev_page }}{% if status_filter != 'all' %}&status={{ status_filter }}{% endif %}"
+                   hx-target="#viewer-area" hx-push-url="true"><i class="fas fa-chevron-left me-1"></i>Previous</a>
+                {% else %}
+                <span class="btn btn-sm btn-light border rounded-pill disabled text-muted">Previous</span>
+                {% endif %}
+                <span class="small text-muted fw-bold">{{ page }} / {{ num_pages }}</span>
+                {% if next_page %}
+                <a href="#" class="btn btn-sm btn-outline-primary rounded-pill"
+                   hx-get="?year={{ year }}&quarter={% if view_all_quarters %}all{% else %}{{ quarter }}{% endif %}{% if office_id %}&office={{ office_id }}{% endif %}&area={{ selected_area_id }}&page={{ next_page }}{% if status_filter != 'all' %}&status={{ status_filter }}{% endif %}"
+                   hx-target="#viewer-area" hx-push-url="true">Next<i class="fas fa-chevron-right ms-1"></i></a>
+                {% else %}
+                <span class="btn btn-sm btn-light border rounded-pill disabled text-muted">Next</span>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>

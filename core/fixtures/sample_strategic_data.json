@@ -1,0 +1,732 @@
+[
+{
+  "model": "core.office",
+  "pk": 16,
+  "fields": {
+    "name": "Demo — Central Programs",
+    "code": "DCP"
+  }
+},
+{
+  "model": "core.office",
+  "pk": 17,
+  "fields": {
+    "name": "Demo — East Regional Office",
+    "code": "DRE"
+  }
+},
+{
+  "model": "core.office",
+  "pk": 18,
+  "fields": {
+    "name": "Demo — West Research Lab",
+    "code": "DWL"
+  }
+},
+{
+  "model": "core.strategiclevel",
+  "pk": 254,
+  "fields": {
+    "name": "Academic Leadership and student success",
+    "level_type": "OUTCOME",
+    "parent": null,
+    "office": null
+  }
+},
+{
+  "model": "core.strategiclevel",
+  "pk": 257,
+  "fields": {
+    "name": "Research and Innovation acceleration",
+    "level_type": "OUTCOME",
+    "parent": null,
+    "office": null
+  }
+},
+{
+  "model": "core.strategiclevel",
+  "pk": 260,
+  "fields": {
+    "name": "Social responsibility community impact",
+    "level_type": "OUTCOME",
+    "parent": null,
+    "office": null
+  }
+},
+{
+  "model": "core.strategiclevel",
+  "pk": 263,
+  "fields": {
+    "name": "Internationalization student mobility",
+    "level_type": "OUTCOME",
+    "parent": null,
+    "office": null
+  }
+},
+{
+  "model": "core.strategiclevel",
+  "pk": 266,
+  "fields": {
+    "name": "Advancing interdisciplinarity cross-college",
+    "level_type": "OUTCOME",
+    "parent": null,
+    "office": null
+  }
+},
+{
+  "model": "core.strategiclevel",
+  "pk": 269,
+  "fields": {
+    "name": "Sustainability campus operations",
+    "level_type": "OUTCOME",
+    "parent": null,
+    "office": null
+  }
+},
+{
+  "model": "core.strategiclevel",
+  "pk": 272,
+  "fields": {
+    "name": "Research and Innovation infrastructure",
+    "level_type": "OUTCOME",
+    "parent": null,
+    "office": null
+  }
+},
+{
+  "model": "core.strategiclevel",
+  "pk": 275,
+  "fields": {
+    "name": "Academic Leadership research mentoring",
+    "level_type": "OUTCOME",
+    "parent": null,
+    "office": null
+  }
+},
+{
+  "model": "core.strategiclevel",
+  "pk": 255,
+  "fields": {
+    "name": "Teaching excellence 2026",
+    "level_type": "STRATEGY",
+    "parent": 254,
+    "office": null
+  }
+},
+{
+  "model": "core.strategiclevel",
+  "pk": 258,
+  "fields": {
+    "name": "Grants and partnerships",
+    "level_type": "STRATEGY",
+    "parent": 257,
+    "office": null
+  }
+},
+{
+  "model": "core.strategiclevel",
+  "pk": 261,
+  "fields": {
+    "name": "Outreach programs",
+    "level_type": "STRATEGY",
+    "parent": 260,
+    "office": null
+  }
+},
+{
+  "model": "core.strategiclevel",
+  "pk": 264,
+  "fields": {
+    "name": "Exchange and mobility",
+    "level_type": "STRATEGY",
+    "parent": 263,
+    "office": null
+  }
+},
+{
+  "model": "core.strategiclevel",
+  "pk": 267,
+  "fields": {
+    "name": "Joint programs",
+    "level_type": "STRATEGY",
+    "parent": 266,
+    "office": null
+  }
+},
+{
+  "model": "core.strategiclevel",
+  "pk": 270,
+  "fields": {
+    "name": "Carbon reduction plan",
+    "level_type": "STRATEGY",
+    "parent": 269,
+    "office": null
+  }
+},
+{
+  "model": "core.strategiclevel",
+  "pk": 273,
+  "fields": {
+    "name": "Core facilities",
+    "level_type": "STRATEGY",
+    "parent": 272,
+    "office": null
+  }
+},
+{
+  "model": "core.strategiclevel",
+  "pk": 276,
+  "fields": {
+    "name": "Graduate mentoring",
+    "level_type": "STRATEGY",
+    "parent": 275,
+    "office": null
+  }
+},
+{
+  "model": "core.strategiclevel",
+  "pk": 256,
+  "fields": {
+    "name": "PAP Graduate outcomes dashboard",
+    "level_type": "PAP",
+    "parent": 255,
+    "office": 16
+  }
+},
+{
+  "model": "core.strategiclevel",
+  "pk": 259,
+  "fields": {
+    "name": "PAP External research funding",
+    "level_type": "PAP",
+    "parent": 258,
+    "office": 16
+  }
+},
+{
+  "model": "core.strategiclevel",
+  "pk": 262,
+  "fields": {
+    "name": "PAP Service learning placements",
+    "level_type": "PAP",
+    "parent": 261,
+    "office": 16
+  }
+},
+{
+  "model": "core.strategiclevel",
+  "pk": 265,
+  "fields": {
+    "name": "PAP Outbound exchange participants",
+    "level_type": "PAP",
+    "parent": 264,
+    "office": 17
+  }
+},
+{
+  "model": "core.strategiclevel",
+  "pk": 268,
+  "fields": {
+    "name": "PAP Joint degree enrollments",
+    "level_type": "PAP",
+    "parent": 267,
+    "office": 17
+  }
+},
+{
+  "model": "core.strategiclevel",
+  "pk": 271,
+  "fields": {
+    "name": "PAP Energy use reduction",
+    "level_type": "PAP",
+    "parent": 270,
+    "office": 17
+  }
+},
+{
+  "model": "core.strategiclevel",
+  "pk": 274,
+  "fields": {
+    "name": "PAP Instrument uptime",
+    "level_type": "PAP",
+    "parent": 273,
+    "office": 18
+  }
+},
+{
+  "model": "core.strategiclevel",
+  "pk": 277,
+  "fields": {
+    "name": "PAP Doctoral completion timeline",
+    "level_type": "PAP",
+    "parent": 276,
+    "office": 18
+  }
+},
+{
+  "model": "core.indicator",
+  "pk": 397,
+  "fields": {
+    "pap": 256,
+    "description": "Graduation rate target (85)",
+    "target_text": ""
+  }
+},
+{
+  "model": "core.indicator",
+  "pk": 398,
+  "fields": {
+    "pap": 256,
+    "description": "First-year retention (90)",
+    "target_text": ""
+  }
+},
+{
+  "model": "core.indicator",
+  "pk": 399,
+  "fields": {
+    "pap": 259,
+    "description": "New awards count (12)",
+    "target_text": ""
+  }
+},
+{
+  "model": "core.indicator",
+  "pk": 400,
+  "fields": {
+    "pap": 259,
+    "description": "Industry partnerships (8)",
+    "target_text": ""
+  }
+},
+{
+  "model": "core.indicator",
+  "pk": 401,
+  "fields": {
+    "pap": 262,
+    "description": "Placements completed (200)",
+    "target_text": ""
+  }
+},
+{
+  "model": "core.indicator",
+  "pk": 402,
+  "fields": {
+    "pap": 265,
+    "description": "Participants target (60)",
+    "target_text": ""
+  }
+},
+{
+  "model": "core.indicator",
+  "pk": 403,
+  "fields": {
+    "pap": 265,
+    "description": "Partner institutions (10)",
+    "target_text": ""
+  }
+},
+{
+  "model": "core.indicator",
+  "pk": 404,
+  "fields": {
+    "pap": 268,
+    "description": "Joint enrollments (40)",
+    "target_text": ""
+  }
+},
+{
+  "model": "core.indicator",
+  "pk": 405,
+  "fields": {
+    "pap": 268,
+    "description": "Cross-listed courses (25)",
+    "target_text": ""
+  }
+},
+{
+  "model": "core.indicator",
+  "pk": 406,
+  "fields": {
+    "pap": 271,
+    "description": "Reduction vs baseline (15)",
+    "target_text": ""
+  }
+},
+{
+  "model": "core.indicator",
+  "pk": 407,
+  "fields": {
+    "pap": 274,
+    "description": "Uptime target (95)",
+    "target_text": ""
+  }
+},
+{
+  "model": "core.indicator",
+  "pk": 408,
+  "fields": {
+    "pap": 274,
+    "description": "User sessions (3000)",
+    "target_text": ""
+  }
+},
+{
+  "model": "core.indicator",
+  "pk": 409,
+  "fields": {
+    "pap": 277,
+    "description": "On-time completion rate (70)",
+    "target_text": ""
+  }
+},
+{
+  "model": "core.performancerecord",
+  "pk": 951,
+  "fields": {
+    "indicator": 397,
+    "quarter": 1,
+    "year": 2026,
+    "target_value": 85.0,
+    "actual_value": 88.0,
+    "raw_actual_text": "88%"
+  }
+},
+{
+  "model": "core.performancerecord",
+  "pk": 952,
+  "fields": {
+    "indicator": 397,
+    "quarter": 2,
+    "year": 2026,
+    "target_value": 85.0,
+    "actual_value": 82.0,
+    "raw_actual_text": "Q2 dip"
+  }
+},
+{
+  "model": "core.performancerecord",
+  "pk": 953,
+  "fields": {
+    "indicator": 397,
+    "quarter": 3,
+    "year": 2026,
+    "target_value": 85.0,
+    "actual_value": null,
+    "raw_actual_text": ""
+  }
+},
+{
+  "model": "core.performancerecord",
+  "pk": 954,
+  "fields": {
+    "indicator": 397,
+    "quarter": 4,
+    "year": 2026,
+    "target_value": 85.0,
+    "actual_value": 90.0,
+    "raw_actual_text": "Recovery"
+  }
+},
+{
+  "model": "core.performancerecord",
+  "pk": 955,
+  "fields": {
+    "indicator": 397,
+    "quarter": 4,
+    "year": 2025,
+    "target_value": 85.0,
+    "actual_value": 80.0,
+    "raw_actual_text": "Prior year"
+  }
+},
+{
+  "model": "core.performancerecord",
+  "pk": 956,
+  "fields": {
+    "indicator": 398,
+    "quarter": 1,
+    "year": 2026,
+    "target_value": 90.0,
+    "actual_value": 92.0,
+    "raw_actual_text": ""
+  }
+},
+{
+  "model": "core.performancerecord",
+  "pk": 957,
+  "fields": {
+    "indicator": 398,
+    "quarter": 2,
+    "year": 2026,
+    "target_value": 90.0,
+    "actual_value": 89.0,
+    "raw_actual_text": ""
+  }
+},
+{
+  "model": "core.performancerecord",
+  "pk": 958,
+  "fields": {
+    "indicator": 398,
+    "quarter": 3,
+    "year": 2026,
+    "target_value": 90.0,
+    "actual_value": 91.0,
+    "raw_actual_text": ""
+  }
+},
+{
+  "model": "core.performancerecord",
+  "pk": 959,
+  "fields": {
+    "indicator": 399,
+    "quarter": 1,
+    "year": 2026,
+    "target_value": 12.0,
+    "actual_value": 15.0,
+    "raw_actual_text": "15 awards"
+  }
+},
+{
+  "model": "core.performancerecord",
+  "pk": 960,
+  "fields": {
+    "indicator": 399,
+    "quarter": 2,
+    "year": 2026,
+    "target_value": 12.0,
+    "actual_value": 10.0,
+    "raw_actual_text": ""
+  }
+},
+{
+  "model": "core.performancerecord",
+  "pk": 961,
+  "fields": {
+    "indicator": 400,
+    "quarter": 1,
+    "year": 2026,
+    "target_value": 8.0,
+    "actual_value": 5.0,
+    "raw_actual_text": "Behind"
+  }
+},
+{
+  "model": "core.performancerecord",
+  "pk": 962,
+  "fields": {
+    "indicator": 400,
+    "quarter": 2,
+    "year": 2026,
+    "target_value": 8.0,
+    "actual_value": 8.0,
+    "raw_actual_text": "On track"
+  }
+},
+{
+  "model": "core.performancerecord",
+  "pk": 963,
+  "fields": {
+    "indicator": 401,
+    "quarter": 1,
+    "year": 2026,
+    "target_value": 200.0,
+    "actual_value": 195.0,
+    "raw_actual_text": ""
+  }
+},
+{
+  "model": "core.performancerecord",
+  "pk": 964,
+  "fields": {
+    "indicator": 401,
+    "quarter": 2,
+    "year": 2026,
+    "target_value": 200.0,
+    "actual_value": 205.0,
+    "raw_actual_text": ""
+  }
+},
+{
+  "model": "core.performancerecord",
+  "pk": 965,
+  "fields": {
+    "indicator": 402,
+    "quarter": 1,
+    "year": 2026,
+    "target_value": 60.0,
+    "actual_value": 72.0,
+    "raw_actual_text": "72 students"
+  }
+},
+{
+  "model": "core.performancerecord",
+  "pk": 966,
+  "fields": {
+    "indicator": 402,
+    "quarter": 2,
+    "year": 2026,
+    "target_value": 60.0,
+    "actual_value": 58.0,
+    "raw_actual_text": ""
+  }
+},
+{
+  "model": "core.performancerecord",
+  "pk": 967,
+  "fields": {
+    "indicator": 403,
+    "quarter": 1,
+    "year": 2026,
+    "target_value": 10.0,
+    "actual_value": 10.0,
+    "raw_actual_text": ""
+  }
+},
+{
+  "model": "core.performancerecord",
+  "pk": 968,
+  "fields": {
+    "indicator": 403,
+    "quarter": 2,
+    "year": 2026,
+    "target_value": 10.0,
+    "actual_value": 9.0,
+    "raw_actual_text": ""
+  }
+},
+{
+  "model": "core.performancerecord",
+  "pk": 969,
+  "fields": {
+    "indicator": 404,
+    "quarter": 1,
+    "year": 2026,
+    "target_value": 40.0,
+    "actual_value": null,
+    "raw_actual_text": "Pending report"
+  }
+},
+{
+  "model": "core.performancerecord",
+  "pk": 970,
+  "fields": {
+    "indicator": 404,
+    "quarter": 2,
+    "year": 2026,
+    "target_value": 40.0,
+    "actual_value": 38.0,
+    "raw_actual_text": ""
+  }
+},
+{
+  "model": "core.performancerecord",
+  "pk": 971,
+  "fields": {
+    "indicator": 405,
+    "quarter": 1,
+    "year": 2026,
+    "target_value": 25.0,
+    "actual_value": 30.0,
+    "raw_actual_text": "30 courses"
+  }
+},
+{
+  "model": "core.performancerecord",
+  "pk": 972,
+  "fields": {
+    "indicator": 406,
+    "quarter": 1,
+    "year": 2026,
+    "target_value": 15.0,
+    "actual_value": 12.0,
+    "raw_actual_text": "12%"
+  }
+},
+{
+  "model": "core.performancerecord",
+  "pk": 973,
+  "fields": {
+    "indicator": 406,
+    "quarter": 2,
+    "year": 2026,
+    "target_value": 15.0,
+    "actual_value": 16.0,
+    "raw_actual_text": ""
+  }
+},
+{
+  "model": "core.performancerecord",
+  "pk": 974,
+  "fields": {
+    "indicator": 407,
+    "quarter": 1,
+    "year": 2026,
+    "target_value": 95.0,
+    "actual_value": 97.0,
+    "raw_actual_text": ""
+  }
+},
+{
+  "model": "core.performancerecord",
+  "pk": 975,
+  "fields": {
+    "indicator": 407,
+    "quarter": 2,
+    "year": 2026,
+    "target_value": 95.0,
+    "actual_value": 96.0,
+    "raw_actual_text": ""
+  }
+},
+{
+  "model": "core.performancerecord",
+  "pk": 976,
+  "fields": {
+    "indicator": 408,
+    "quarter": 1,
+    "year": 2026,
+    "target_value": 3000.0,
+    "actual_value": 2800.0,
+    "raw_actual_text": ""
+  }
+},
+{
+  "model": "core.performancerecord",
+  "pk": 977,
+  "fields": {
+    "indicator": 408,
+    "quarter": 2,
+    "year": 2026,
+    "target_value": 3000.0,
+    "actual_value": 3100.0,
+    "raw_actual_text": ""
+  }
+},
+{
+  "model": "core.performancerecord",
+  "pk": 978,
+  "fields": {
+    "indicator": 409,
+    "quarter": 1,
+    "year": 2026,
+    "target_value": 70.0,
+    "actual_value": 75.0,
+    "raw_actual_text": "75%"
+  }
+},
+{
+  "model": "core.performancerecord",
+  "pk": 979,
+  "fields": {
+    "indicator": 409,
+    "quarter": 2,
+    "year": 2026,
+    "target_value": 70.0,
+    "actual_value": 68.0,
+    "raw_actual_text": ""
+  }
+}
+]
+

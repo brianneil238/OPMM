@@ -1,0 +1,14 @@
+Portable sample (three Demo offices, PAP tree, 13 indicators, 29 performance rows).
+
+File: sample_strategic_data.json (same content as running: python manage.py seed_sample_data --reset)
+
+Regenerate from your project (Demo rows only):
+  python manage.py seed_sample_data --reset
+  python manage.py export_demo_fixture
+
+Load into another Django environment (same app/models, after migrate):
+  python manage.py loaddata sample_strategic_data
+
+If you get duplicate primary key errors, the target database already has rows
+with those PKs. Use a fresh database, or flush core tables first, or run
+seed_sample_data --reset on that environment instead of loaddata.

@@ -1,0 +1,221 @@
+{% load announcements %}
+<div class="modal fade" id="sopm-help-modal" tabindex="-1" aria-labelledby="sopm-help-modal-label" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+            <div class="modal-header border-0 pb-0 align-items-start">
+                <div>
+                    <h5 class="modal-title fw-bold mb-1" id="sopm-help-modal-label">Help center</h5>
+                    <p class="small text-muted mb-0">FAQ, guides, and announcements for OPMM</p>
+                </div>
+                <button type="button" class="btn-close mt-1" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body px-3 px-md-4 pt-0">
+                <ul class="nav nav-pills sopm-help-hub-nav mb-3" id="sopmHelpHubTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="sopm-help-tab-faq-btn" data-bs-toggle="tab" data-bs-target="#sopm-help-tab-faq" type="button" role="tab" aria-controls="sopm-help-tab-faq" aria-selected="true">FAQ</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="sopm-help-tab-guide-btn" data-bs-toggle="tab" data-bs-target="#sopm-help-tab-guide" type="button" role="tab" aria-controls="sopm-help-tab-guide" aria-selected="false">Guide</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="sopm-help-tab-news-btn" data-bs-toggle="tab" data-bs-target="#sopm-help-tab-news" type="button" role="tab" aria-controls="sopm-help-tab-news" aria-selected="false">Announcements</button>
+                    </li>
+                </ul>
+
+                <div class="tab-content sopm-help-tab-content" id="sopmHelpHubTabContent">
+                    <div class="tab-pane fade show active" id="sopm-help-tab-faq" role="tabpanel" aria-labelledby="sopm-help-tab-faq-btn" tabindex="0">
+                        <div class="sopm-help-tab-pane-box">
+                            <p class="text-muted small mb-3">These address how <strong>this OPMM app</strong> routes data, filters, and notices—not generic &quot;how to use a browser&quot; tips. Use the <strong>Guide</strong> tab for full walkthroughs.</p>
+                            <div class="accordion sopm-help-hub-accordion" id="sopmHelpFaqAccordion">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sopmHelpFaq1" aria-expanded="false" aria-controls="sopmHelpFaq1">I opened Dashboard—why did I land on the full-year KPI matrix instead of a different page?</button>
+                                </h2>
+                                <div id="sopmHelpFaq1" class="accordion-collapse collapse" data-bs-parent="#sopmHelpFaqAccordion">
+                                    <div class="accordion-body">
+                                        For many office-linked accounts the app’s default entry is a <strong>full fiscal-year matrix</strong> (all quarters, all development areas) so you land on live KPIs immediately. Superusers without extra URL parameters are routed the same way. If you need a single quarter, pick it in the viewer’s <strong>Period</strong> strip once you arrive.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sopmHelpFaq2" aria-expanded="false" aria-controls="sopmHelpFaq2">Same office as a teammate, but their bell shows a notice I never get—what should I check?</button>
+                                </h2>
+                                <div id="sopmHelpFaq2" class="accordion-collapse collapse" data-bs-parent="#sopmHelpFaqAccordion">
+                                    <div class="accordion-body">
+                                        Administrators can post <strong>globally</strong> or to <strong>selected offices only</strong>. Office-scoped posts are delivered only to accounts that resolve to that office in this system (your profile is matched to an <strong>Office</strong> record). If you expected the same notice, confirm with your admin that your account is tied to the correct office—not only your display name on the chip.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sopmHelpFaq3" aria-expanded="false" aria-controls="sopmHelpFaq3">A quarter I expected under Period is grayed out or says no data—does that mean the upload is wrong?</button>
+                                </h2>
+                                <div id="sopmHelpFaq3" class="accordion-collapse collapse" data-bs-parent="#sopmHelpFaqAccordion">
+                                    <div class="accordion-body">
+                                        The viewer only enables quarters that actually have <strong>ingested performance rows</strong> for the fiscal year you selected. If ingestion never included that quarter, the tab stays disabled so you are not shown an empty matrix by mistake. Use <strong>All</strong> or another FY from the year dropdown if the quarter you need is missing.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sopmHelpFaq4" aria-expanded="false" aria-controls="sopmHelpFaq4">After search, the indicator changed but FY, quarter, and office stayed the same—was that intentional?</button>
+                                </h2>
+                                <div id="sopmHelpFaq4" class="accordion-collapse collapse" data-bs-parent="#sopmHelpFaqAccordion">
+                                    <div class="accordion-body">
+                                        The app reloads the viewer via HTMX and keeps your current <strong>fiscal year</strong>, <strong>quarter</strong>, <strong>office</strong> (when applicable), and <strong>development area</strong> from the URL—it only swaps in the focused <strong>indicator</strong>. That is intentional so you do not lose context when jumping between KPIs.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sopmHelpFaq5" aria-expanded="false" aria-controls="sopmHelpFaq5">Variance text doesn't match the Met / Unmet pill—which one drives rollups?</button>
+                                </h2>
+                                <div id="sopmHelpFaq5" class="accordion-collapse collapse" data-bs-parent="#sopmHelpFaqAccordion">
+                                    <div class="accordion-body">
+                                        <strong>Variance</strong> reflects the monitor’s quantitative or textual “variance vs target” column. The status pill also considers <strong>explicit accomplishment language</strong> from the upload (for example narrative MET/UNMET) and inferred values when numbers are missing. When they differ, trust the pill for rollups and open the <strong>row detail</strong> modal to see both the narrative and the numbers side by side.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sopmHelpFaq6" aria-expanded="false" aria-controls="sopmHelpFaq6">I need to re-upload only our office's monitors without touching anyone else—which tool is that, vs a full reset?</button>
+                                </h2>
+                                <div id="sopmHelpFaq6" class="accordion-collapse collapse" data-bs-parent="#sopmHelpFaqAccordion">
+                                    <div class="accordion-body">
+                                        <strong>Clear office data</strong> (when shown) deletes ingested indicators and scores for <strong>your office only</strong> so you can re-upload monitors without touching other offices. A <strong>full reset</strong> is a superuser maintenance action that can wipe the entire strategic dataset—those controls are gated and should be rare. Check the <strong>Activity Log</strong> after either operation.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sopmHelpFaq7" aria-expanded="false" aria-controls="sopmHelpFaq7">The LPC export doesn't mirror the exact rows on my screen—what scope does the file always include?</button>
+                                </h2>
+                                <div id="sopmHelpFaq7" class="accordion-collapse collapse" data-bs-parent="#sopmHelpFaqAccordion">
+                                    <div class="accordion-body">
+                                        The export is a <strong>wide LPC workbook for the whole fiscal year</strong> (all quarters and development areas) so planners can work offline in one file. The on-screen matrix may still be narrowed to one quarter or area. The <strong>Office</strong> filter continues to apply to the export when you have one selected—so the file is “full FY for that office,” not necessarily identical to the current table view.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sopmHelpFaq8" aria-expanded="false" aria-controls="sopmHelpFaq8">The announcements badge went back to unread right after I cleared it—is something stuck?</button>
+                                </h2>
+                                <div id="sopmHelpFaq8" class="accordion-collapse collapse" data-bs-parent="#sopmHelpFaqAccordion">
+                                    <div class="accordion-body">
+                                        The badge counts <strong>active announcements you have not acknowledged yet</strong> in this app. Reading the drawer or dismissing the viewer toast marks the visible posts as read. If an administrator publishes a <strong>new</strong> active notice afterward, the unread count returns—that is expected, not a bug.
+                                    </div>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane fade" id="sopm-help-tab-guide" role="tabpanel" aria-labelledby="sopm-help-tab-guide-btn" tabindex="0">
+                        <div class="sopm-help-tab-pane-box">
+                        <p class="sopm-help-lead mb-3">
+                            Open the sections below for fuller explanations. Everything here matches how the app behaves in your browser.
+                        </p>
+                        <div class="accordion sopm-help-hub-accordion" id="sopmHelpGuideAccordion">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#sopmHelpGuide1" aria-expanded="true" aria-controls="sopmHelpGuide1"><i class="fas fa-magnifying-glass me-2 text-muted" aria-hidden="true"></i>Search (top bar)</button>
+                                </h2>
+                                <div id="sopmHelpGuide1" class="accordion-collapse collapse show" data-bs-parent="#sopmHelpGuideAccordion">
+                                    <div class="accordion-body">
+                                        <p class="mb-2">The search box finds text in your <strong>Outcome</strong>, <strong>Strategy</strong>, <strong>PAP</strong>, and <strong>indicator</strong> labels. Each suggestion shows where the match fits so you can confirm the right row before you open it.</p>
+                                        <ul class="mb-2">
+                                            <li>Click a result to go to the <strong>Performance viewer</strong> with that KPI in focus. If you are already on the viewer, your fiscal year, quarter, office, and development-area filters stay applied.</li>
+                                            <li>Try a few distinctive words from the matrix (for example part of a strategy sentence or a PAP name) if the indicator title alone is too generic.</li>
+                                        </ul>
+                                        <div class="sopm-help-tip mb-0">
+                                            <strong><kbd class="px-2 py-1 rounded border bg-white text-dark">Esc</kbd></strong> closes the suggestion list and moves focus out of the search field. Click outside the search box to dismiss suggestions without clearing what you typed.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sopmHelpGuide2" aria-expanded="false" aria-controls="sopmHelpGuide2"><i class="fas fa-table me-2 text-muted" aria-hidden="true"></i>Performance viewer</button>
+                                </h2>
+                                <div id="sopmHelpGuide2" class="accordion-collapse collapse" data-bs-parent="#sopmHelpGuideAccordion">
+                                    <div class="accordion-body">
+                                        <p class="mb-2">The <strong>Indicator matrix</strong> groups rows by outcome (color band), then strategy and PAP. Colored edge lines mark the hierarchy columns; the indicator column can show a thin accent for Met / Unmet / Pending.</p>
+                                        <ul class="mb-0">
+                                            <li>Use <strong>FY</strong>, <strong>Period</strong> (all quarters or Q1–Q4), and <strong>Development area</strong> to narrow the table. Superusers can also pick an <strong>Office</strong> or combine offices.</li>
+                                            <li>Click any <strong>matrix row</strong> to open a detail panel with targets, accomplishments, variance, and remarks for that KPI.</li>
+                                            <li>Use <strong>Previous</strong> / <strong>Next</strong> at the bottom when the matrix is paginated.</li>
+                                            <li>Use <strong>Export LPC Excel</strong> in the matrix toolbar for a wide spreadsheet (full fiscal year, all quarters and development areas; the office filter still applies when you have one selected).</li>
+                                            <li>Use the <strong>bell</strong> beside your account for the announcements drawer; the red badge is your <strong>unread</strong> count until you open the drawer or dismiss the viewer toast.</li>
+                                            <li>Active notices may pop in as a <strong>large toast</strong> for about ten seconds — use <strong>×</strong> or <kbd class="px-1 rounded border bg-light text-dark" style="font-size: 0.68rem;">Esc</kbd> to dismiss early.</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sopmHelpGuide3" aria-expanded="false" aria-controls="sopmHelpGuide3"><i class="fas fa-th-large me-2 text-muted" aria-hidden="true"></i>Dashboard &amp; analytics</button>
+                                </h2>
+                                <div id="sopmHelpGuide3" class="accordion-collapse collapse" data-bs-parent="#sopmHelpGuideAccordion">
+                                    <div class="accordion-body">
+                                        <p class="mb-2">Open <strong>Dashboard</strong> in the left sidebar for the office overview. <strong>Analytics</strong> offers charts and summaries built from the same ingested performance data.</p>
+                                        <ul class="mb-0">
+                                            <li>Superusers opening the dashboard without extra query parameters are sent to a full fiscal-year overview in the viewer by default.</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sopmHelpGuide4" aria-expanded="false" aria-controls="sopmHelpGuide4"><i class="fas fa-cloud-upload-alt me-2 text-muted" aria-hidden="true"></i>Data ingestion &amp; activity</button>
+                                </h2>
+                                <div id="sopmHelpGuide4" class="accordion-collapse collapse" data-bs-parent="#sopmHelpGuideAccordion">
+                                    <div class="accordion-body">
+                                        <p class="mb-2"><strong>Data Ingestion</strong> is where approved monitor files (for example Word or Excel OPMM layouts) are uploaded and parsed into indicators and scores.</p>
+                                        <ul class="mb-0">
+                                            <li><strong>Activity Log</strong> records uploads, backups, resets, and other system actions so you can audit who did what and when.</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sopmHelpGuide5" aria-expanded="false" aria-controls="sopmHelpGuide5"><i class="fas fa-hourglass-half me-2 text-muted" aria-hidden="true"></i>While pages load</button>
+                                </h2>
+                                <div id="sopmHelpGuide5" class="accordion-collapse collapse" data-bs-parent="#sopmHelpGuideAccordion">
+                                    <div class="accordion-body">
+                                        <p class="mb-0">A thin <strong>cardinal loading bar</strong> may appear at the top of the window when the app fetches a new screen (for example HTMX updates to the dashboard or viewer). Wait for it to finish before clicking again if a request feels slow.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sopmHelpGuide6" aria-expanded="false" aria-controls="sopmHelpGuide6"><i class="fas fa-user-shield me-2 text-muted" aria-hidden="true"></i>Account menu</button>
+                                </h2>
+                                <div id="sopmHelpGuide6" class="accordion-collapse collapse" data-bs-parent="#sopmHelpGuideAccordion">
+                                    <div class="accordion-body">
+                                        <p class="mb-0">Your profile chip opens quick actions. Use the <strong>bell</strong> beside your account for announcements (same posts as the Announcements tab here). This <strong>Help center</strong> opens from your account menu; superusers also see <strong>User management</strong> and <strong>Post announcements</strong>. Use <strong>Sign out</strong> on shared computers.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+
+                    <div class="tab-pane fade" id="sopm-help-tab-news" role="tabpanel" aria-labelledby="sopm-help-tab-news-btn" tabindex="0">
+                        <div class="sopm-help-tab-pane-box">
+                            <div class="d-flex align-items-center gap-2 mb-3">
+                                <span class="sopm-help-section-title mb-0"><i class="fas fa-bullhorn" aria-hidden="true"></i> Announcements</span>
+                            </div>
+                            {% announcements_panel %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0 px-3 px-md-4 pb-3">
+                <button type="button" class="btn btn-outline-secondary px-3" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary px-4" data-bs-dismiss="modal">Done</button>
+            </div>
+        </div>
+    </div>
+</div>

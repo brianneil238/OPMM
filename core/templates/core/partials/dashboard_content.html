@@ -1,0 +1,174 @@
+<div id="dashboard-area" class="animate__animated animate__fadeIn" data-group-mode="table">
+    <style>
+        .dashboard-matrix-wrap {
+            max-height: min(72vh, 880px);
+            overflow: auto;
+            border-radius: 0 0 20px 20px;
+        }
+        .dashboard-matrix-table { border-color: #cbd5e1 !important; font-size: 0.8rem; min-width: 960px; }
+        .dashboard-matrix-table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            font-size: 0.62rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            white-space: nowrap;
+            vertical-align: middle;
+            border-bottom: 2px solid #94a3b8 !important;
+            box-shadow: 0 1px 0 #e2e8f0;
+        }
+        .dashboard-matrix-table tbody td {
+            vertical-align: top;
+            border-color: #e2e8f0 !important;
+            max-width: 11rem;
+            word-break: break-word;
+        }
+        .dashboard-matrix-table tbody td.matrix-td-wide { max-width: 16rem; }
+        .dashboard-matrix-table tbody td.matrix-td-tight { max-width: 3rem; }
+        .dashboard-matrix-table tbody tr:nth-child(even) { background-color: #f8fafc; }
+    </style>
+
+    <div class="d-flex justify-content-between align-items-center mb-4 p-3 bg-white shadow-sm border" style="border-radius: 15px;">
+        <div class="d-flex align-items-center">
+            <div class="me-4 pe-4 border-end">
+                <span class="text-muted text-uppercase fw-bold" style="font-size: 0.65rem; display: block;">Target Office</span>
+                <span class="fw-bold text-dark">{{ office_display_name }}</span>
+            </div>
+
+            <div class="dropdown">
+                <span class="text-muted text-uppercase fw-bold" style="font-size: 0.65rem; display: block;">Fiscal year</span>
+                <button class="btn btn-sm btn-light rounded-pill dropdown-toggle fw-bold text-primary px-3 border" data-bs-toggle="dropdown">
+                    FY {{ year }}
+                </button>
+                <ul class="dropdown-menu border-0 shadow-lg mt-2">
+                    {% for y in available_years %}
+                    <li>
+                        <a class="dropdown-item small {% if y == year %}active bg-primary text-white{% endif %}"
+                           href="#" hx-get="?year={{ y }}&quarter={% if view_all_quarters %}all{% else %}{{ selected_quarter }}{% endif %}" hx-target="#dashboard-area">
+                           FY {{ y }}
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="dropdown ms-3">
+                <span class="text-muted text-uppercase fw-bold" style="font-size: 0.65rem; display: block;">Quarter</span>
+                <button class="btn btn-sm btn-light rounded-pill dropdown-toggle fw-bold text-primary px-3 border" data-bs-toggle="dropdown">
+                    {% if view_all_quarters %}All quarters{% else %}Q{{ selected_quarter }}{% endif %}
+                </button>
+                <ul class="dropdown-menu border-0 shadow-lg mt-2">
+                    <li>
+                        <a class="dropdown-item small fw-semibold {% if view_all_quarters %}active bg-primary text-white{% endif %}"
+                           href="#" hx-get="?quarter=all&year={{ year }}" hx-target="#dashboard-area">
+                           All quarters
+                        </a>
+                    </li>
+                    <li><hr class="dropdown-divider my-1"></li>
+                    {% for q_num in available_quarters %}
+                    <li>
+                        <a class="dropdown-item small {% if not view_all_quarters and q_num == selected_quarter %}active bg-primary{% endif %}"
+                           href="#" hx-get="?quarter={{ q_num }}&year={{ year }}" hx-target="#dashboard-area">
+                           Quarter {{ q_num }}
+                        </a>
+                    </li>
+                    {% empty %}
+                    <li><span class="dropdown-item small text-muted">No quarter data for this year</span></li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    {% if focus_indicator %}
+    <div class="d-flex justify-content-between align-items-start gap-3 mb-4 p-3 border" style="border-radius: 14px; background: #f8fafc; border-color: #e2e8e0 !important;">
+        <div class="d-flex align-items-start gap-3">
+            <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background: #c00000; color: white;">
+                <i class="fas fa-bullseye"></i>
+            </div>
+            <div>
+                <div class="text-uppercase fw-bold text-primary mb-1" style="font-size: 0.65rem; letter-spacing: 0.5px;">Focused target</div>
+                <div class="fw-semibold text-dark small">{{ focus_indicator.description }}</div>
+                <div class="text-muted x-small">{{ focus_indicator.pap.name }}</div>
+            </div>
+        </div>
+        <a class="btn btn-sm btn-light fw-bold rounded-pill border" href="#"
+           hx-get="?year={{ year }}&quarter={% if view_all_quarters %}all{% else %}{{ selected_quarter }}{% endif %}"
+           hx-target="#dashboard-area"
+           hx-push-url="true">
+           <i class="fas fa-times me-1"></i> Clear focus
+        </a>
+    </div>
+    {% endif %}
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="card p-4 border-0 shadow-sm border-start border-danger border-4" style="border-radius: 16px;">
+                <div class="small fw-bold text-danger mb-1 text-uppercase">{% if view_all_quarters %}Unmet (all quarters){% else %}Unmet (Q{{ selected_quarter }}){% endif %}</div>
+                <div class="h2 fw-bold mb-0 text-dark">{{ unmet }}</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card p-4 border-0 shadow-sm border-start border-success border-4" style="border-radius: 16px;">
+                <div class="small fw-bold text-success mb-1 text-uppercase">{% if view_all_quarters %}Met (all quarters){% else %}Met (Q{{ selected_quarter }}){% endif %}</div>
+                <div class="h2 fw-bold mb-0 text-dark">{{ met }}</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card p-4 border-0 shadow-sm border-start border-primary border-4" style="border-radius: 16px;">
+                <div class="small fw-bold text-primary mb-1 text-uppercase">Total Indicators</div>
+                <div class="h2 fw-bold mb-0 text-dark">{{ total }}</div>
+            </div>
+        </div>
+    </div>
+
+    <p class="small text-muted mb-3 px-1">Each <strong>row</strong> is one KPI (Operational Plan Monitoring style): OPMM area, outcome, strategy, program/PAP, indicator, accomplishments, remarks, and status. Scroll horizontally on small screens.</p>
+
+    <div class="card border-0 shadow-sm overflow-hidden" style="border-radius: 20px;">
+        <div class="dashboard-matrix-wrap">
+        <table class="table table-bordered dashboard-matrix-table mb-0">
+            <thead class="table-secondary">
+                <tr>
+                    {% if view_all_quarters %}<th scope="col" class="matrix-td-tight">Qtr</th>{% endif %}
+                    <th scope="col">OPMM area</th>
+                    <th scope="col">Outcome</th>
+                    <th scope="col">Strategy</th>
+                    <th scope="col">Program / PAP</th>
+                    <th scope="col">Performance indicator</th>
+                    <th scope="col">Actual accomplishments</th>
+                    <th scope="col">Remarks</th>
+                    <th scope="col" class="text-center">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in records %}
+                <tr>
+                    {% if view_all_quarters %}<td class="text-muted text-center matrix-td-tight">Q{{ record.quarter }}</td>{% endif %}
+                    <td>{{ record.dev_area_display }}</td>
+                    <td>{{ record.matrix_outcome|linebreaksbr }}</td>
+                    <td>{{ record.matrix_strategy|linebreaksbr }}</td>
+                    <td>{{ record.matrix_pap|linebreaksbr }}</td>
+                    <td class="matrix-td-wide fw-semibold text-dark">{{ record.matrix_indicator|linebreaksbr }}</td>
+                    <td class="matrix-td-wide">{% if record.matrix_accomplishment %}{{ record.matrix_accomplishment|linebreaksbr }}{% else %}<span class="text-muted">—</span>{% endif %}</td>
+                    <td class="matrix-td-wide text-muted">{% if record.matrix_remarks %}{{ record.matrix_remarks|linebreaksbr }}{% else %}<span class="text-muted">—</span>{% endif %}</td>
+                    <td class="text-center text-nowrap align-middle">
+                        {% if record.matrix_status == 'MET' %}
+                        <span class="badge bg-success-subtle text-success border border-success rounded-pill px-2 py-1 small">MET</span>
+                        {% elif record.matrix_status == 'UNMET' %}
+                        <span class="badge bg-danger-subtle text-danger border border-danger rounded-pill px-2 py-1 small">UNMET</span>
+                        {% else %}
+                        <span class="badge bg-secondary-subtle text-secondary border rounded-pill px-2 py-1 small">PENDING</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="{% if view_all_quarters %}9{% else %}8{% endif %}" class="text-center py-5 text-muted small">No data for {% if view_all_quarters %}FY {{ year }}{% else %}Q{{ selected_quarter }}, FY {{ year }}{% endif %}.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        </div>
+    </div>
+</div>

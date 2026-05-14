@@ -1,0 +1,104 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Migration Success{% endblock %}
+
+{% block content %}
+<div class="container-fluid d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="col-md-6 col-lg-4 text-center">
+        
+        <div class="mb-4">
+            <div class="display-1 text-success animate__animated animate__bounceIn">
+                <i class="fas fa-check-circle"></i>
+            </div>
+        </div>
+
+        <div class="glass-card p-5 shadow-lg border-0" style="border-radius: 24px; background: white;">
+            <h2 class="fw-bold text-dark mb-3">Migration Complete!</h2>
+            {% if rows_ingested is not None %}
+            <p class="mb-3 {% if rows_ingested == 0 %}text-warning fw-semibold{% else %}text-muted{% endif %}">
+                Performance rows saved: <strong>{{ rows_ingested }}</strong>
+                {% if rows_ingested == 0 %}
+                — no data rows matched the expected table (columns A–E: outcome, strategy, PAP, indicator, accomplishment). Set the reporting year on upload if the file has no clear FY, then open the Performance viewer and pick that FY.
+                {% endif %}
+            </p>
+            {% endif %}
+            {% if val_total is not None %}
+            <div class="text-start small mb-3 p-3 bg-light border" style="border-radius: 12px;">
+                <div class="fw-bold text-dark mb-1">Ingest validation snapshot</div>
+                {% if validation_scope %}<div class="text-muted mb-2">{{ validation_scope }}</div>{% endif %}
+                <div class="text-muted">Indicators: <strong>{{ val_indicators }}</strong></div>
+                <div class="text-muted">Rows: <strong>{{ val_total }}</strong></div>
+                <div class="text-success">Met: <strong>{{ val_met }}</strong></div>
+                <div class="text-danger">Unmet: <strong>{{ val_unmet }}</strong></div>
+                <div class="text-secondary">Pending: <strong>{{ val_pending }}</strong></div>
+                {% if ingest_breakdown_lines %}
+                <hr class="my-2">
+                <div class="fw-bold text-dark mb-1">Source breakdown</div>
+                {% for line in ingest_breakdown_lines %}
+                <div class="text-muted" style="font-size: 0.72rem;">{{ line }}</div>
+                {% endfor %}
+                {% endif %}
+            </div>
+            {% endif %}
+            <p class="text-muted mb-4">
+                {% if ingested_count > 1 %}
+                <strong>{{ ingested_count }}</strong> blueprints were securely parsed, mapped, and synchronized with your office records.
+                {% else %}
+                The institutional data has been securely parsed, mapped, and synchronized with your office records.
+                {% endif %}
+            </p>
+
+            <div class="d-grid gap-3">
+                <a href="{% url 'dashboard_home' %}" class="btn btn-dark btn-lg py-3 fw-bold rounded-pill shadow-sm">
+                    <i class="fas fa-th-large me-2"></i> Go to Dashboard
+                </a>
+                <a href="{% url 'upload_blueprint' %}" class="btn btn-outline-secondary btn-lg py-3 fw-bold rounded-pill">
+                    <i class="fas fa-upload me-2"></i> Upload Another
+                </a>
+            </div>
+
+            <div class="mt-5 p-3 bg-light rounded-pill">
+                <p class="small text-muted m-0">
+                    Redirecting to Dashboard in <span id="countdown" class="fw-bold text-primary">5</span> seconds...
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Smart Redirect Logic
+    let seconds = 5;
+    const countdownElement = document.getElementById('countdown');
+    
+    const interval = setInterval(() => {
+        seconds--;
+        countdownElement.innerText = seconds;
+        if (seconds <= 0) {
+            clearInterval(interval);
+            window.location.href = "{% url 'dashboard_home' %}";
+        }
+    }, 1000);
+</script>
+
+<style>
+    .glass-card {
+        transition: transform 0.3s ease;
+    }
+    .glass-card:hover {
+        transform: translateY(-5px);
+    }
+    .animate__bounceIn {
+        animation: bounceIn 0.8s;
+    }
+    @keyframes bounceIn {
+        from, 20%, 40%, 60%, 80%, to { animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1); }
+        0% { opacity: 0; transform: scale3d(0.3, 0.3, 0.3); }
+        20% { transform: scale3d(1.1, 1.1, 1.1); }
+        40% { transform: scale3d(0.9, 0.9, 0.9); }
+        60% { opacity: 1; transform: scale3d(1.03, 1.03, 1.03); }
+        80% { transform: scale3d(0.97, 0.97, 0.97); }
+        to { opacity: 1; transform: scale3d(1, 1, 1); }
+    }
+</style>
+{% endblock %}
