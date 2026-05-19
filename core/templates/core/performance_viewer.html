@@ -246,6 +246,101 @@
         .viewer-filter-select { width: 100%; min-width: 0; }
         .viewer-headline { font-size: 1.15rem !important; }
         .viewer-dashboard-hero { padding: 0.85rem !important; }
+        .viewer-kpi-pill {
+            flex: 1 1 100% !important;
+            min-width: 0 !important;
+            border-right: 0 !important;
+            border-bottom: 1px solid #eef2f7 !important;
+        }
+        .viewer-kpi-pill:last-child { border-bottom: 0 !important; }
+        .viewer-kpi-period-rail .viewer-filter-bar-inner {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 0.65rem;
+        }
+        .viewer-kpi-period-rail .viewer-tabs {
+            width: 100%;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        .viewer-kpi-period-rail .viewer-tab {
+            flex: 1 1 auto;
+            min-width: 2.75rem !important;
+        }
+        .viewer-kpi-period-rail .dropdown { width: 100%; }
+        .viewer-kpi-period-rail .dropdown .btn { width: 100%; min-height: 44px; }
+        .viewer-table-toolbar {
+            flex-direction: column;
+            align-items: stretch !important;
+        }
+        .viewer-table-toolbar > span.text-muted {
+            text-align: left !important;
+        }
+        .viewer-table-toolbar .btn {
+            width: 100%;
+            min-height: 44px;
+        }
+        .viewer-scroll-hint {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.85rem;
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: #64748b;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .viewer-scroll-hint i { color: var(--bsu-seal-red, #c00000); }
+        .viewer-pagination {
+            position: sticky;
+            bottom: 0;
+            z-index: 5;
+            background: #fff;
+            box-shadow: 0 -4px 16px rgba(15, 23, 42, 0.06);
+            padding-bottom: max(0.65rem, env(safe-area-inset-bottom, 0px)) !important;
+        }
+        .viewer-pagination .btn {
+            flex: 1 1 0;
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .viewer-focus-banner {
+            flex-direction: column !important;
+            align-items: stretch !important;
+        }
+        .viewer-focus-banner .btn { width: 100%; min-height: 44px; }
+    }
+    .viewer-scroll-hint { display: none; }
+    @media (max-width: 991.98px) {
+        .viewer-scroll-hint { display: flex; }
+        .viewer-table-wrap {
+            max-height: min(52dvh, 480px);
+        }
+        #viewerIndicatorModal .modal-dialog {
+            margin: 0;
+            max-width: 100%;
+            min-height: 100dvh;
+            height: 100%;
+        }
+        #viewerIndicatorModal .modal-content {
+            min-height: 100dvh;
+            border-radius: 0;
+            border: 0;
+        }
+        #viewerIndicatorModal .modal-header {
+            padding-top: max(1rem, env(safe-area-inset-top, 0px));
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            background: #fff;
+        }
+        .viewer-area-strip {
+            grid-template-columns: 1fr;
+        }
+        .viewer-area-card { min-height: 76px; }
     }
     .viewer-period-meta { font-size: 0.72rem; }
     .viewer-chip { display: inline-flex; align-items: center; gap: 4px; padding: 5px 12px; border-radius: 999px; background: #f1f5f9; color: #475569; font-weight: 700; font-size: 0.7rem; border: 1px solid transparent; }
@@ -615,7 +710,7 @@
 </div>
 
 <div class="modal fade" id="viewerIndicatorModal" tabindex="-1" aria-labelledby="viewerIndicatorModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable modal-fullscreen-md-down">
         <div class="modal-content border-0 shadow-lg">
             <div class="modal-header border-bottom align-items-start">
                 <h5 class="modal-title fw-bold text-dark pe-3" id="viewerIndicatorModalLabel">Indicator details</h5>

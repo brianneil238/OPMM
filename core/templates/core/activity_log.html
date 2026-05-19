@@ -19,7 +19,12 @@
     .log-badge.warning { background:#fef3c7; color:#92400e; border-color:#fcd34d; }
     .log-badge.error { background:#fee2e2; color:#991b1b; border-color:#fecaca; }
     .log-empty { padding:2.8rem 1rem; text-align:center; color:#94a3b8; }
-    .log-table-wrap { max-height:min(68vh,720px); overflow:auto; border-radius:0 0 16px 16px; }
+    .log-table-wrap { max-height:min(68vh,720px); overflow:auto; border-radius:0 0 16px 16px; -webkit-overflow-scrolling:touch; }
+    @media (max-width: 767.98px) {
+        .log-table { font-size: 0.78rem; min-width: 640px; }
+        .log-table-wrap { max-height: min(58dvh, 520px); }
+        .log-title { font-size: 1.2rem; }
+    }
 </style>
 
 <div class="container-fluid" style="max-width: 1200px;">

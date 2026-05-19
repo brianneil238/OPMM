@@ -28,11 +28,54 @@
         .dashboard-matrix-table tbody td.matrix-td-wide { max-width: 16rem; }
         .dashboard-matrix-table tbody td.matrix-td-tight { max-width: 3rem; }
         .dashboard-matrix-table tbody tr:nth-child(even) { background-color: #f8fafc; }
+        .dashboard-matrix-hint { display: none; }
+        @media (max-width: 767.98px) {
+            .dashboard-toolbar-card {
+                flex-direction: column;
+                align-items: stretch !important;
+                gap: 1rem !important;
+            }
+            .dashboard-toolbar-card .dashboard-office-block {
+                border: 0 !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            .dashboard-toolbar-filters {
+                flex-direction: column;
+                align-items: stretch !important;
+                width: 100%;
+                gap: 0.75rem !important;
+            }
+            .dashboard-toolbar-filters .dropdown { width: 100%; }
+            .dashboard-toolbar-filters .dropdown .btn {
+                width: 100%;
+                min-height: 44px;
+                justify-content: space-between;
+            }
+            .dashboard-matrix-wrap {
+                max-height: min(58dvh, 520px);
+                -webkit-overflow-scrolling: touch;
+            }
+            .dashboard-matrix-hint {
+                display: flex;
+                align-items: center;
+                gap: 0.45rem;
+                font-size: 0.72rem;
+                font-weight: 600;
+                color: #64748b;
+                margin-bottom: 0.65rem;
+            }
+        }
     </style>
 
-    <div class="d-flex justify-content-between align-items-center mb-4 p-3 bg-white shadow-sm border" style="border-radius: 15px;">
-        <div class="d-flex align-items-center">
-            <div class="me-4 pe-4 border-end">
+    <div class="dashboard-matrix-hint" aria-hidden="true">
+        <i class="fas fa-arrows-left-right text-primary"></i>
+        <span>Swipe sideways to scroll the full matrix</span>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-4 p-3 bg-white shadow-sm border dashboard-toolbar-card" style="border-radius: 15px;">
+        <div class="d-flex align-items-center dashboard-toolbar-filters flex-wrap">
+            <div class="me-4 pe-4 border-end dashboard-office-block">
                 <span class="text-muted text-uppercase fw-bold" style="font-size: 0.65rem; display: block;">Target Office</span>
                 <span class="fw-bold text-dark">{{ office_display_name }}</span>
             </div>
@@ -102,20 +145,20 @@
     </div>
     {% endif %}
 
-    <div class="row g-4 mb-4">
-        <div class="col-md-4">
+    <div class="row g-3 g-md-4 mb-4">
+        <div class="col-12 col-md-4">
             <div class="card p-4 border-0 shadow-sm border-start border-danger border-4" style="border-radius: 16px;">
                 <div class="small fw-bold text-danger mb-1 text-uppercase">{% if view_all_quarters %}Unmet (all quarters){% else %}Unmet (Q{{ selected_quarter }}){% endif %}</div>
                 <div class="h2 fw-bold mb-0 text-dark">{{ unmet }}</div>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-12 col-md-4">
             <div class="card p-4 border-0 shadow-sm border-start border-success border-4" style="border-radius: 16px;">
                 <div class="small fw-bold text-success mb-1 text-uppercase">{% if view_all_quarters %}Met (all quarters){% else %}Met (Q{{ selected_quarter }}){% endif %}</div>
                 <div class="h2 fw-bold mb-0 text-dark">{{ met }}</div>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-12 col-md-4">
             <div class="card p-4 border-0 shadow-sm border-start border-primary border-4" style="border-radius: 16px;">
                 <div class="small fw-bold text-primary mb-1 text-uppercase">Total Indicators</div>
                 <div class="h2 fw-bold mb-0 text-dark">{{ total }}</div>

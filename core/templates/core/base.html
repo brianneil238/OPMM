@@ -779,11 +779,33 @@
                 display: none !important;
             }
         }
+        .sopm-mobile-title {
+            font-size: 1rem;
+            font-weight: 800;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--bsu-seal-red);
+            line-height: 1;
+            flex-shrink: 0;
+        }
         @media (max-width: 991.98px) {
             #sopm-sidebar .nav.flex-column {
                 overflow-y: auto;
                 flex: 1 1 auto;
                 -webkit-overflow-scrolling: touch;
+                padding-bottom: 0.5rem;
+            }
+            #sopm-sidebar .nav-link {
+                min-height: 48px;
+                display: flex;
+                align-items: center;
+                margin: 0.2rem 0.35rem;
+                border-radius: 10px;
+            }
+            #sopm-sidebar .logout-btn {
+                min-height: 48px;
+                display: flex;
+                align-items: center;
             }
             .main-content {
                 margin-left: 0 !important;
@@ -801,7 +823,12 @@
             }
             .main-content > .sopm-page-body {
                 padding: 1rem !important;
-                padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px)) !important;
+                padding-bottom: max(1.25rem, env(safe-area-inset-bottom, 0px)) !important;
+            }
+            .search-shell .bg-light {
+                min-height: 44px;
+                padding-top: 0.35rem !important;
+                padding-bottom: 0.35rem !important;
             }
             #search-input {
                 font-size: 16px;
@@ -816,24 +843,51 @@
                 padding: 0.2rem;
                 border-radius: 50%;
             }
+            .sopm-announce-nav-btn,
+            .sopm-nav-toggle {
+                width: 48px;
+                height: 48px;
+            }
             .search-results-anchor {
                 max-width: 100%;
                 left: 0;
                 right: 0;
+            }
+            #sopm-help-modal .modal-dialog {
+                margin: 0.5rem auto;
+                max-width: calc(100vw - 1rem);
+            }
+            #sopm-help-modal .modal-body {
+                max-height: min(78dvh, 640px);
+            }
+            .card.shadow-sm,
+            .glass-card {
+                border-radius: 14px !important;
             }
         }
         @media (max-width: 575.98px) {
             .top-navbar {
                 flex-wrap: wrap;
             }
+            .sopm-mobile-title {
+                order: 1;
+                flex: 1 1 auto;
+                min-width: 0;
+            }
+            .sopm-nav-toggle {
+                order: 0;
+            }
             .search-shell {
-                order: 3;
+                order: 4;
                 flex: 1 1 100%;
                 min-width: 0;
             }
             .top-navbar > .d-flex.align-items-center.gap-2 {
                 order: 2;
                 margin-left: auto;
+            }
+            #search-input::placeholder {
+                font-size: 0.75rem;
             }
         }
     </style>
@@ -901,6 +955,7 @@
                 aria-label="Open menu">
             <i class="fas fa-bars" aria-hidden="true"></i>
         </button>
+        <span class="sopm-mobile-title d-lg-none" aria-hidden="true">OPMM</span>
         <div class="search-shell position-relative flex-grow-1 min-w-0" id="search-shell">
             {% block search_extras %}
             <input type="hidden" id="sopm-dashboard-group-global" name="group" value="pillar">
