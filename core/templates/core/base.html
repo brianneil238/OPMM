@@ -723,13 +723,130 @@
             font-size: 2rem;
             color: var(--bsu-seal-red);
         }
+
+        /* —— Mobile / tablet: collapsible nav, full-width content —— */
+        .sopm-nav-toggle {
+            width: 44px;
+            height: 44px;
+            padding: 0;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            background: #fff;
+            color: #334155;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .sopm-nav-toggle:hover {
+            border-color: #cbd5e1;
+            color: var(--bsu-seal-red);
+            background: var(--bsu-tint);
+        }
+        #sopm-sidebar.sidebar.offcanvas {
+            display: flex;
+            flex-direction: column;
+            width: min(300px, 88vw);
+        }
+        #sopm-sidebar .offcanvas-header {
+            border-bottom: 1px solid var(--sidebar-edge);
+            padding: 0.85rem 1rem;
+        }
+        #sopm-sidebar .offcanvas-title {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: var(--bsu-seal-red);
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+        @media (min-width: 992px) {
+            #sopm-sidebar.offcanvas-lg {
+                position: fixed !important;
+                top: 0;
+                left: 0;
+                z-index: 2000;
+                display: flex !important;
+                flex-direction: column;
+                width: 260px;
+                max-width: 260px;
+                height: 100vh;
+                transform: none !important;
+                visibility: visible !important;
+                border-right: 1px solid var(--sidebar-edge);
+                box-shadow: 2px 0 24px rgba(0, 0, 0, 0.04);
+            }
+            #sopm-sidebar .offcanvas-header {
+                display: none !important;
+            }
+        }
+        @media (max-width: 991.98px) {
+            #sopm-sidebar .nav.flex-column {
+                overflow-y: auto;
+                flex: 1 1 auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            .main-content {
+                margin-left: 0 !important;
+                width: 100% !important;
+                max-width: 100%;
+            }
+            #sopm-htmx-overlay,
+            #sopm-htmx-loader {
+                left: 0 !important;
+            }
+            .top-navbar {
+                padding: 10px 12px;
+                padding-top: max(10px, env(safe-area-inset-top, 0px));
+                gap: 0.5rem;
+            }
+            .main-content > .sopm-page-body {
+                padding: 1rem !important;
+                padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px)) !important;
+            }
+            #search-input {
+                font-size: 16px;
+            }
+            #search-input::placeholder {
+                font-size: 0.8rem;
+            }
+            .top-user-text {
+                display: none;
+            }
+            .top-user-chip-inner {
+                padding: 0.2rem;
+                border-radius: 50%;
+            }
+            .search-results-anchor {
+                max-width: 100%;
+                left: 0;
+                right: 0;
+            }
+        }
+        @media (max-width: 575.98px) {
+            .top-navbar {
+                flex-wrap: wrap;
+            }
+            .search-shell {
+                order: 3;
+                flex: 1 1 100%;
+                min-width: 0;
+            }
+            .top-navbar > .d-flex.align-items-center.gap-2 {
+                order: 2;
+                margin-left: auto;
+            }
+        }
     </style>
 </head>
 <body>
 
 <div id="sopm-htmx-loader" aria-hidden="true" role="presentation"></div>
 
-<div class="sidebar">
+<div class="offcanvas offcanvas-start offcanvas-lg sidebar" id="sopm-sidebar" tabindex="-1" aria-labelledby="sopm-sidebar-label">
+    <div class="offcanvas-header d-lg-none">
+        <h2 class="offcanvas-title" id="sopm-sidebar-label">OPMM Menu</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close menu"></button>
+    </div>
     <div class="sidebar-brand text-center">
         <div class="sidebar-logo-shell">
             <a href="{% url 'dashboard_home' %}" class="sidebar-logo-link text-decoration-none" title="Dashboard — OPMM">
@@ -776,6 +893,14 @@
 
 <div class="main-content">
     <nav class="top-navbar d-flex align-items-center flex-nowrap gap-2">
+        <button type="button"
+                class="sopm-nav-toggle d-lg-none"
+                data-bs-toggle="offcanvas"
+                data-bs-target="#sopm-sidebar"
+                aria-controls="sopm-sidebar"
+                aria-label="Open menu">
+            <i class="fas fa-bars" aria-hidden="true"></i>
+        </button>
         <div class="search-shell position-relative flex-grow-1 min-w-0" id="search-shell">
             {% block search_extras %}
             <input type="hidden" id="sopm-dashboard-group-global" name="group" value="pillar">
@@ -865,7 +990,7 @@
         </div>
         </div>
     </nav>
-    <div class="p-5">
+    <div class="sopm-page-body p-4 p-lg-5">
         {% block content %}{% endblock %}
     </div>
 </div>
@@ -1069,7 +1194,24 @@
             if (input) input.blur();
         }
     });
+    function sopmCloseMobileSidebar() {
+        var el = document.getElementById('sopm-sidebar');
+        if (!el || !window.bootstrap || !window.bootstrap.Offcanvas) return;
+        var inst = window.bootstrap.Offcanvas.getInstance(el);
+        if (inst) inst.hide();
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
+        var sidebar = document.getElementById('sopm-sidebar');
+        if (sidebar) {
+            sidebar.querySelectorAll('.nav-link[href], .logout-btn').forEach(function (node) {
+                node.addEventListener('click', function () {
+                    if (window.matchMedia('(max-width: 991.98px)').matches) {
+                        sopmCloseMobileSidebar();
+                    }
+                });
+            });
+        }
         const va = document.getElementById('viewer-area');
         if (va) sopmBindViewerAnnouncementPopup(va);
         var annBtn = document.getElementById('sopm-announcement-toggle');

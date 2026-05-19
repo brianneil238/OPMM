@@ -19,6 +19,7 @@
         }
         body {
             min-height: 100vh;
+            min-height: 100dvh;
             margin: 0;
             font-family: 'Inter', system-ui, sans-serif;
             background: #eef1f5;
@@ -141,6 +142,14 @@
                 min-height: 440px;
             }
         }
+        @media (max-width: 575.98px) {
+            body { padding: 0.75rem; align-items: flex-start; padding-top: max(0.75rem, env(safe-area-inset-top)); }
+            .login-card { border-radius: 16px; }
+            .login-brand-col { min-height: 200px; padding: 1.5rem 1.25rem; }
+            .login-form-col { padding: 1.35rem 1.15rem 1.5rem; }
+            .login-form-heading { font-size: 1.35rem; }
+            .login-form-col .form-control { font-size: 16px; }
+        }
         .login-form-eyebrow {
             font-size: 0.68rem;
             font-weight: 700;
@@ -253,8 +262,7 @@
                 <div class="col-lg-7 login-form-col">
                     <div class="login-form-eyebrow">Secure access</div>
                     <h1 class="login-form-heading">Staff sign in</h1>
-                    <p class="login-form-lead mb-0">Use your office abbreviation and password after an admin registers you (e.g. OVCRDES).</p>
-                    <p class="text-muted small mb-0 mt-2">First-time on Render: sign in with the <strong>superuser</strong> from <code>ensure_superuser</code> or <code>createsuperuser</code> (often <strong>root</strong> or <strong>admin</strong>) — not your office code until it exists in User management.</p>
+                    <p class="login-form-lead mb-0">Use your office username and password to open the dashboard.</p>
 
                     {% if form.errors %}
                     <div class="alert alert-danger small py-2 mb-3" role="alert">Invalid username or password. Check spelling and caps; office codes must be registered first.</div>
