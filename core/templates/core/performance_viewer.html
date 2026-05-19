@@ -242,17 +242,159 @@
     }
     .viewer-filter-label { font-size: 0.62rem; font-weight: 800; letter-spacing: 0.6px; text-transform: uppercase; color: #64748b; }
     .viewer-filter-select { width: auto; min-width: 200px; max-width: 100%; font-size: 0.82rem; font-weight: 600; }
+    /* Collapsible filters on phone; always visible on tablet+ */
+    .viewer-filter-panel { border: 0; margin: 0; }
+    .viewer-filter-panel__summary {
+        display: none;
+        list-style: none;
+        cursor: pointer;
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: #334155;
+        padding: 0.65rem 0.85rem;
+        margin-top: 0.65rem;
+        border-radius: 10px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+    }
+    .viewer-filter-panel__summary::-webkit-details-marker { display: none; }
+    .viewer-filter-panel__summary::after {
+        content: '\f078';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+        float: right;
+        font-size: 0.7rem;
+        color: #94a3b8;
+        transition: transform 0.15s ease;
+    }
+    .viewer-filter-panel[open] .viewer-filter-panel__summary::after { transform: rotate(180deg); }
+    @media (min-width: 768px) {
+        .viewer-filter-panel .viewer-kpi-filters-wrap { display: flex !important; }
+    }
+    @media (max-width: 767.98px) {
+        .viewer-filter-panel__summary { display: block; }
+        .viewer-filter-panel:not([open]) .viewer-kpi-filters-wrap { display: none; }
+        .viewer-filter-panel .viewer-kpi-filters-wrap {
+            margin-top: 0.5rem;
+            padding-top: 0.65rem;
+            border-top: 1px solid #eef2f7;
+        }
+        .viewer-kpi-period-band { padding: 0.65rem 0.75rem 0.75rem; }
+        .viewer-kpi-strip {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            border: 0;
+            background: transparent;
+            gap: 8px;
+        }
+        .viewer-kpi-pill {
+            flex: none !important;
+            min-width: 0 !important;
+            min-height: auto !important;
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 12px !important;
+            padding: 0.65rem 0.75rem !important;
+            border-right: 1px solid #e2e8f0 !important;
+            border-bottom: 1px solid #e2e8f0 !important;
+        }
+        .viewer-kpi-pill-visual { display: none; }
+        .viewer-kpi-pill-value { font-size: 1.35rem !important; }
+        .viewer-kpi-pill-meta { font-size: 0.65rem; }
+        .viewer-dashboard-hero .viewer-eyebrow { display: none; }
+        .viewer-dashboard-hero { padding: 0.75rem 0.85rem !important; }
+        .viewer-headline { font-size: 1.05rem !important; }
+    }
+
+    .viewer-mobile-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding: 0.75rem;
+        max-height: min(62dvh, 560px);
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    .viewer-mobile-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 0.85rem 0.95rem;
+        cursor: pointer;
+        transition: border-color 0.12s ease, box-shadow 0.12s ease;
+        border-left: 4px solid #94a3b8;
+    }
+    .viewer-mobile-card.viewer-matrix-tone-met { border-left-color: #22c55e; }
+    .viewer-mobile-card.viewer-matrix-tone-unmet { border-left-color: #ef4444; }
+    .viewer-mobile-card.viewer-matrix-tone-pending { border-left-color: #94a3b8; }
+    .viewer-mobile-card:active,
+    .viewer-mobile-card.active {
+        border-color: #c00000;
+        box-shadow: 0 4px 16px rgba(192, 0, 0, 0.1);
+        background: #fffdfd;
+    }
+    .viewer-mobile-card__head {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.45rem;
+    }
+    .viewer-mobile-card__num {
+        font-size: 0.72rem;
+        font-weight: 800;
+        color: #94a3b8;
+    }
+    .viewer-mobile-card__status .viewer-status-block {
+        min-width: auto;
+        padding: 4px 10px;
+        font-size: 0.62rem;
+    }
+    .viewer-mobile-card__title {
+        font-size: 0.88rem;
+        font-weight: 700;
+        color: #0f172a;
+        line-height: 1.35;
+        margin: 0 0 0.35rem;
+    }
+    .viewer-mobile-card__pap {
+        font-size: 0.72rem;
+        color: #64748b;
+        margin: 0 0 0.55rem;
+        line-height: 1.35;
+    }
+    .viewer-mobile-card__stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+        margin: 0 0 0.55rem;
+    }
+    .viewer-mobile-card__stats dt {
+        font-size: 0.58rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: #94a3b8;
+        margin: 0;
+    }
+    .viewer-mobile-card__stats dd {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 2px 0 0;
+    }
+    .viewer-mobile-card__cta {
+        display: block;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: #c00000;
+    }
+
     @media (max-width: 575.98px) {
         .viewer-filter-select { width: 100%; min-width: 0; }
         .viewer-headline { font-size: 1.15rem !important; }
         .viewer-dashboard-hero { padding: 0.85rem !important; }
-        .viewer-kpi-pill {
-            flex: 1 1 100% !important;
-            min-width: 0 !important;
-            border-right: 0 !important;
-            border-bottom: 1px solid #eef2f7 !important;
+        .viewer-kpi-pill:nth-child(n) {
+            flex: none !important;
         }
-        .viewer-kpi-pill:last-child { border-bottom: 0 !important; }
         .viewer-kpi-period-rail .viewer-filter-bar-inner {
             flex-direction: column;
             align-items: stretch;
@@ -350,7 +492,7 @@
     .viewer-kpi-period-rail .viewer-tab { padding: 7px 14px !important; font-size: 0.84rem !important; min-width: 44px !important; }
     .viewer-kpi-period-rail .dropdown .btn { padding: 0.38rem 0.85rem; font-size: 0.88rem; background: #fff; }
     .viewer-kpi-period-rail .viewer-filter-label { font-size: 0.72rem; }
-    @media (max-width: 991.98px) {
+    @media (min-width: 768px) and (max-width: 991.98px) {
         .viewer-kpi-period-band {
             padding: 0.8rem 0.85rem;
         }
@@ -651,10 +793,24 @@
     }
     @media (max-width: 991.98px) {
         .sopm-viewer-announcement-popup {
+            top: auto;
+            bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
             left: max(0.75rem, env(safe-area-inset-left, 0px));
             right: max(0.75rem, env(safe-area-inset-right, 0px));
             width: auto;
             max-width: none;
+            transform: translateY(18px);
+        }
+        .sopm-viewer-announcement-popup.is-visible {
+            transform: translateY(0);
+        }
+        .sopm-viewer-announcement-popup__inner {
+            padding: 1rem 2.5rem 1rem 1rem;
+        }
+        .sopm-viewer-announcement-popup__title { font-size: 1rem; }
+        .sopm-viewer-announcement-popup__body {
+            font-size: 0.88rem;
+            max-height: min(28vh, 10rem);
         }
     }
     .sopm-viewer-announcement-popup.is-visible {
@@ -729,8 +885,8 @@
         var modalEl = document.getElementById('viewerIndicatorModal');
         if (modalEl) {
             modalEl.addEventListener('hidden.bs.modal', function () {
-                document.querySelectorAll('#viewer-area .viewer-table tbody tr.active').forEach(function (tr) {
-                    tr.classList.remove('active');
+                document.querySelectorAll('#viewer-area .viewer-table tbody tr.active, #viewer-area .viewer-mobile-card.active').forEach(function (el) {
+                    el.classList.remove('active');
                 });
             });
         }
@@ -739,11 +895,13 @@
         setTimeout(function () {
             var pk = String({{ selected_record.pk }});
             var tr = document.querySelector('#viewer-area .viewer-table tbody tr[data-record-pk="' + pk + '"]');
-            if (tr) {
-                document.querySelectorAll('#viewer-area .viewer-table tbody tr').forEach(function (r) {
+            var card = document.querySelector('#viewer-area .viewer-mobile-card[data-record-pk="' + pk + '"]');
+            var row = tr || card;
+            if (row) {
+                document.querySelectorAll('#viewer-area .viewer-table tbody tr, #viewer-area .viewer-mobile-card').forEach(function (r) {
                     r.classList.remove('active');
                 });
-                tr.classList.add('active');
+                row.classList.add('active');
             }
         }, 0);
         {% endif %}

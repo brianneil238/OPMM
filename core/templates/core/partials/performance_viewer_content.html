@@ -16,8 +16,8 @@
                 {% if view_all_quarters %}FY {{ year }} — All quarters{% else %}Q{{ quarter }} {{ year }}{% endif %}
             </div>
             <div class="text-muted small mt-1 mb-0" style="max-width: 42rem;">
-                {% if view_all_quarters %}Performance across all ingested quarters for this view.{% else %}Performance summary for the selected quarter.{% endif %}
-                {% if selected_office_name %}<span class="d-block mt-1">{{ selected_office_name }}</span>{% elif combined_offices %}<span class="d-block mt-1">All offices (combined)</span>{% endif %}
+                <span class="d-none d-md-inline">{% if view_all_quarters %}Performance across all ingested quarters for this view.{% else %}Performance summary for the selected quarter.{% endif %}</span>
+                {% if selected_office_name %}<span class="d-block mt-1 fw-semibold text-dark">{{ selected_office_name }}</span>{% elif combined_offices %}<span class="d-block mt-1 fw-semibold text-dark">All offices</span>{% endif %}
             </div>
         </div>
     </div>
@@ -97,6 +97,10 @@
             </div>
         </div>
     </div>
+    <details class="viewer-filter-panel">
+        <summary class="viewer-filter-panel__summary">
+            <i class="fas fa-sliders me-2" aria-hidden="true"></i>Filters &amp; period
+        </summary>
     <div class="viewer-kpi-filters-wrap">
         {% if user.is_superuser and available_offices %}
         <div class="viewer-kpi-office-rail">
@@ -157,6 +161,7 @@
             </div>
         </div>
     </div>
+    </details>
 </div>
 
 <div class="row g-3">
@@ -164,7 +169,7 @@
         <div class="viewer-card p-0 overflow-hidden">
             <div class="viewer-table-toolbar px-3 pt-3 pb-2 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <div>
-                    <div class="viewer-kpi-label mb-1"><i class="fas fa-table me-1 text-primary"></i> Indicator matrix</div>
+                    <div class="viewer-kpi-label mb-1"><i class="fas fa-list me-1 text-primary d-md-none"></i><i class="fas fa-table me-1 text-primary d-none d-md-inline"></i> <span class="d-md-none">Indicators</span><span class="d-none d-md-inline">Indicator matrix</span></div>
                     <div class="fw-bold text-dark small">{{ selected_area_name|default:"All development areas" }}</div>
                 </div>
                 <span class="text-muted small fw-bold text-end">
@@ -179,11 +184,62 @@
                     <i class="fas fa-file-excel me-1 text-success"></i> Export LPC Excel
                 </a>
             </div>
-            <div class="viewer-scroll-hint" aria-hidden="true">
+            <div class="viewer-mobile-list d-md-none" role="list" aria-label="Indicators">
+                {% for row in indicator_row_items %}
+                {% with record=row.record %}
+                <article class="viewer-mobile-card viewer-matrix-tone-{{ row.matrix_row_tone }}{% if selected_record and record.pk == selected_record.pk %} active{% endif %}"
+                         role="listitem"
+                         data-record-pk="{{ record.pk }}"
+                         hx-get="{% url 'performance_viewer_indicator_detail' record.pk %}"
+                         hx-target="#viewer-indicator-modal-body"
+                         hx-swap="innerHTML"
+                         hx-push-url="false"
+                         hx-on:click="document.querySelectorAll('#viewer-area .viewer-mobile-card').forEach(function (el) { el.classList.remove('active'); }); this.classList.add('active');">
+                    <header class="viewer-mobile-card__head">
+                        <span class="viewer-mobile-card__num">#{{ page_start_index|add:forloop.counter }}</span>
+                        {% if view_all_quarters %}<span class="viewer-quarter-tag">Q{{ record.quarter }}</span>{% endif %}
+                        <span class="viewer-mobile-card__status ms-auto">
+                            {% if record.status == 'MET' %}<span class="viewer-status-met viewer-status-block">Met</span>
+                            {% elif record.status == 'UNMET' %}<span class="viewer-status-unmet viewer-status-block">Unmet</span>
+                            {% else %}<span class="viewer-status-pending viewer-status-block">Pending</span>{% endif %}
+                        </span>
+                    </header>
+                    <h3 class="viewer-mobile-card__title">{{ record.indicator.description }}</h3>
+                    {% if row.pap_text %}
+                    <p class="viewer-mobile-card__pap">{{ row.pap_text|truncatechars:120 }}</p>
+                    {% endif %}
+                    <dl class="viewer-mobile-card__stats">
+                        <div>
+                            <dt>Target</dt>
+                            <dd>{% if record.target_value is not None %}{{ record.target_value|floatformat:"-2" }}{% else %}—{% endif %}</dd>
+                        </div>
+                        <div>
+                            <dt>Actual</dt>
+                            <dd>
+                                {% if record.matrix_accomplishment %}
+                                    {{ record.matrix_accomplishment|truncatechars:48 }}
+                                {% elif record.actual_value is not None %}
+                                    {{ record.actual_value|floatformat:"-2" }}
+                                {% else %}—{% endif %}
+                            </dd>
+                        </div>
+                        <div>
+                            <dt>Variance</dt>
+                            <dd class="{{ row.variance_cell_class }}">{{ record.variance_text|default:"—"|truncatechars:24 }}</dd>
+                        </div>
+                    </dl>
+                    <span class="viewer-mobile-card__cta">Tap for full details <i class="fas fa-chevron-right ms-1" aria-hidden="true"></i></span>
+                </article>
+                {% endwith %}
+                {% empty %}
+                <p class="viewer-empty mb-0 py-4">No indicators for this view. Try another period or filter.</p>
+                {% endfor %}
+            </div>
+            <div class="viewer-scroll-hint d-none d-md-flex" aria-hidden="true">
                 <i class="fas fa-arrows-left-right"></i>
                 <span>Swipe sideways to see all columns</span>
             </div>
-            <div class="viewer-table-wrap">
+            <div class="viewer-table-wrap d-none d-md-block">
                 <table class="viewer-table">
                     <thead>
                         <tr>

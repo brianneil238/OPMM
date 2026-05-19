@@ -789,6 +789,21 @@
             flex-shrink: 0;
         }
         @media (max-width: 991.98px) {
+            #sopm-sidebar .sidebar-logo-shell {
+                width: 76px;
+                height: 72px;
+            }
+            #sopm-sidebar .sidebar-app-tagline,
+            #sopm-sidebar .sidebar-app-locale {
+                display: none;
+            }
+            #sopm-sidebar .sidebar-brand {
+                padding: 1rem 0.85rem 0.85rem;
+            }
+            #sopm-sidebar .sidebar-app-title {
+                margin-top: 0.75rem;
+                font-size: 0.95rem;
+            }
             #sopm-sidebar .nav.flex-column {
                 overflow-y: auto;
                 flex: 1 1 auto;
@@ -822,8 +837,13 @@
                 gap: 0.5rem;
             }
             .main-content > .sopm-page-body {
-                padding: 1rem !important;
+                padding: 0.75rem !important;
                 padding-bottom: max(1.25rem, env(safe-area-inset-bottom, 0px)) !important;
+            }
+            .sopm-page-body .row.g-3,
+            .sopm-page-body .row.g-4 {
+                --bs-gutter-y: 0.75rem;
+                --bs-gutter-x: 0.75rem;
             }
             .search-shell .bg-light {
                 min-height: 44px;
@@ -962,7 +982,7 @@
             {% endblock %}
             <div class="d-flex align-items-center bg-light rounded-3 px-3 py-2">
                 <i class="fas fa-search text-muted"></i>
-                <input type="text" name="q" id="search-input" placeholder="Search indicators — click a result to focus"
+                <input type="text" name="q" id="search-input" placeholder="Search KPIs…"
                        class="form-control form-control-sm border-0 bg-transparent shadow-none ms-2 px-0"
                        autocomplete="off"
                        hx-get="{% url 'search_suggestions' %}"
