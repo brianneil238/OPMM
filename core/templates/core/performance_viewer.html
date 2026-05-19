@@ -269,7 +269,13 @@
     }
     .viewer-filter-panel[open] .viewer-filter-panel__summary::after { transform: rotate(180deg); }
     @media (min-width: 768px) {
-        .viewer-filter-panel .viewer-kpi-filters-wrap { display: flex !important; }
+        .viewer-filter-panel .viewer-kpi-filters-wrap {
+            display: flex !important;
+            visibility: visible !important;
+        }
+        .viewer-filter-panel:not([open]) .viewer-kpi-filters-wrap {
+            display: flex !important;
+        }
     }
     @media (max-width: 767.98px) {
         .viewer-filter-panel__summary { display: block; }
@@ -976,6 +982,22 @@
 
 <script>
 (function () {
+    function sopmSyncViewerFilterPanel() {
+        var panel = document.querySelector('#viewer-area .viewer-filter-panel');
+        if (!panel) return;
+        if (window.matchMedia('(max-width: 767.98px)').matches) {
+            panel.removeAttribute('open');
+        } else {
+            panel.setAttribute('open', '');
+        }
+    }
+    document.addEventListener('DOMContentLoaded', sopmSyncViewerFilterPanel);
+    document.body.addEventListener('htmx:afterSwap', function (ev) {
+        var target = ev.detail && ev.detail.target;
+        if (target && target.id === 'viewer-area') {
+            sopmSyncViewerFilterPanel();
+        }
+    });
     document.addEventListener('DOMContentLoaded', function () {
         var modalEl = document.getElementById('viewerIndicatorModal');
         if (modalEl) {
