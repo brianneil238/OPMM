@@ -187,7 +187,7 @@
             <div class="viewer-mobile-list d-md-none" role="list" aria-label="Indicators">
                 {% for row in indicator_row_items %}
                 {% with record=row.record %}
-                <article class="viewer-mobile-card viewer-matrix-tone-{{ row.matrix_row_tone }}{% if selected_record and record.pk == selected_record.pk %} active{% endif %}"
+                <article class="viewer-mobile-card viewer-outcome-band-{{ row.outcome_band_idx }} viewer-matrix-tone-{{ row.matrix_row_tone }}{% if row.pap_group_start %} viewer-pap-group-start{% endif %}{% if selected_record and record.pk == selected_record.pk %} active{% endif %}"
                          role="listitem"
                          data-record-pk="{{ record.pk }}"
                          hx-get="{% url 'performance_viewer_indicator_detail' record.pk %}"
@@ -195,40 +195,77 @@
                          hx-swap="innerHTML"
                          hx-push-url="false"
                          hx-on:click="document.querySelectorAll('#viewer-area .viewer-mobile-card').forEach(function (el) { el.classList.remove('active'); }); this.classList.add('active');">
-                    <header class="viewer-mobile-card__head">
-                        <span class="viewer-mobile-card__num">#{{ page_start_index|add:forloop.counter }}</span>
+                    <header class="viewer-mobile-card__meta">
+                        <span class="viewer-mobile-card__num">{{ page_start_index|add:forloop.counter }}</span>
                         {% if view_all_quarters %}<span class="viewer-quarter-tag">Q{{ record.quarter }}</span>{% endif %}
-                        <span class="viewer-mobile-card__status ms-auto">
-                            {% if record.status == 'MET' %}<span class="viewer-status-met viewer-status-block">Met</span>
-                            {% elif record.status == 'UNMET' %}<span class="viewer-status-unmet viewer-status-block">Unmet</span>
-                            {% else %}<span class="viewer-status-pending viewer-status-block">Pending</span>{% endif %}
-                        </span>
+                        {% if combined_offices %}
+                        <span class="viewer-mobile-card__office">{{ record.indicator.pap.office.name|default:"—"|truncatechars:40 }}</span>
+                        {% endif %}
                     </header>
-                    <h3 class="viewer-mobile-card__title">{{ record.indicator.description }}</h3>
-                    {% if row.pap_text %}
-                    <p class="viewer-mobile-card__pap">{{ row.pap_text|truncatechars:120 }}</p>
-                    {% endif %}
-                    <dl class="viewer-mobile-card__stats">
-                        <div>
-                            <dt>Target</dt>
-                            <dd>{% if record.target_value is not None %}{{ record.target_value|floatformat:"-2" }}{% else %}—{% endif %}</dd>
+                    <div class="viewer-mobile-matrix">
+                        {% if row.outcome_text %}
+                        <div class="viewer-mobile-matrix__cell viewer-mobile-matrix__cell--outcome">
+                            <span class="viewer-mobile-matrix__label">Outcome</span>
+                            <span class="viewer-mobile-matrix__value">{{ row.outcome_text }}</span>
                         </div>
-                        <div>
-                            <dt>Actual</dt>
-                            <dd>
-                                {% if record.matrix_accomplishment %}
-                                    {{ record.matrix_accomplishment|truncatechars:48 }}
-                                {% elif record.actual_value is not None %}
-                                    {{ record.actual_value|floatformat:"-2" }}
-                                {% else %}—{% endif %}
-                            </dd>
+                        {% endif %}
+                        {% if row.strategy_text %}
+                        <div class="viewer-mobile-matrix__cell viewer-mobile-matrix__cell--strategy">
+                            <span class="viewer-mobile-matrix__label">Strategy</span>
+                            <span class="viewer-mobile-matrix__value">{{ row.strategy_text }}</span>
                         </div>
-                        <div>
-                            <dt>Variance</dt>
-                            <dd class="{{ row.variance_cell_class }}">{{ record.variance_text|default:"—"|truncatechars:24 }}</dd>
+                        {% endif %}
+                        {% if row.pap_text %}
+                        <div class="viewer-mobile-matrix__cell viewer-mobile-matrix__cell--pap">
+                            <span class="viewer-mobile-matrix__label">PAP <span class="viewer-mobile-matrix__sublabel">(programs / activities / projects)</span></span>
+                            {% if row.pap_kpi_total > 1 %}
+                            <span class="viewer-pap-kpi-count d-block mb-1">{{ row.pap_kpi_total }} indicators</span>
+                            {% endif %}
+                            <span class="viewer-mobile-matrix__value">{{ row.pap_text }}</span>
                         </div>
-                    </dl>
-                    <span class="viewer-mobile-card__cta">Tap for full details <i class="fas fa-chevron-right ms-1" aria-hidden="true"></i></span>
+                        {% endif %}
+                        <div class="viewer-mobile-matrix__cell viewer-mobile-matrix__cell--indicator">
+                            <span class="viewer-mobile-matrix__label">Indicator <span class="viewer-mobile-matrix__sublabel">(KPI under PAP)</span></span>
+                            <span class="viewer-mobile-matrix__value">
+                                {% if row.pap_kpi_total > 1 %}
+                                <span class="viewer-kpi-order-badge">{{ row.pap_kpi_index }} / {{ row.pap_kpi_total }}</span>
+                                {% endif %}
+                                {{ record.indicator.description }}
+                            </span>
+                        </div>
+                        <div class="viewer-mobile-matrix__metrics">
+                            <div class="viewer-mobile-matrix__metric viewer-mobile-matrix__metric--target">
+                                <span class="viewer-mobile-matrix__metric-label">Target</span>
+                                <span class="viewer-mobile-matrix__metric-value">{% if record.target_value is not None %}{{ record.target_value|floatformat:"-2" }}{% else %}—{% endif %}</span>
+                            </div>
+                            <div class="viewer-mobile-matrix__metric viewer-mobile-matrix__metric--actual">
+                                <span class="viewer-mobile-matrix__metric-label">Actual accomplishments</span>
+                                <span class="viewer-mobile-matrix__metric-value">
+                                    {% if record.matrix_accomplishment %}
+                                        {{ record.matrix_accomplishment|linebreaksbr }}
+                                    {% elif record.actual_value is not None %}
+                                        {{ record.actual_value|floatformat:"-2" }}
+                                    {% else %}—{% endif %}
+                                </span>
+                            </div>
+                            <div class="viewer-mobile-matrix__metric viewer-mobile-matrix__metric--variance">
+                                <span class="viewer-mobile-matrix__metric-label">Variance <span class="viewer-mobile-matrix__sublabel">(vs. target)</span></span>
+                                <span class="viewer-mobile-matrix__metric-value {{ row.variance_cell_class }}">{{ record.variance_text|default:"—" }}</span>
+                            </div>
+                            <div class="viewer-mobile-matrix__metric viewer-mobile-matrix__metric--status">
+                                <span class="viewer-mobile-matrix__metric-label">Met / Unmet</span>
+                                <span class="viewer-mobile-matrix__metric-value">
+                                    {% if record.status == 'MET' %}<span class="viewer-status-met viewer-status-block">Met</span>
+                                    {% elif record.status == 'UNMET' %}<span class="viewer-status-unmet viewer-status-block">Unmet</span>
+                                    {% else %}<span class="viewer-status-pending viewer-status-block">Pending</span>{% endif %}
+                                </span>
+                            </div>
+                            <div class="viewer-mobile-matrix__metric viewer-mobile-matrix__metric--remarks">
+                                <span class="viewer-mobile-matrix__metric-label">Remarks</span>
+                                <span class="viewer-mobile-matrix__metric-value">{% if record.matrix_remarks %}{{ record.matrix_remarks|linebreaksbr }}{% else %}—{% endif %}</span>
+                            </div>
+                        </div>
+                    </div>
                 </article>
                 {% endwith %}
                 {% empty %}

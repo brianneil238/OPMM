@@ -832,9 +832,34 @@
                 left: 0 !important;
             }
             .top-navbar {
-                padding: 10px 12px;
+                display: grid !important;
+                grid-template-columns: auto 1fr auto;
+                grid-template-areas:
+                    "menu title actions"
+                    "search search search";
+                align-items: center;
+                column-gap: 0.5rem;
+                row-gap: 0.55rem;
+                padding: 10px 12px 12px;
                 padding-top: max(10px, env(safe-area-inset-top, 0px));
-                gap: 0.5rem;
+            }
+            .top-navbar .sopm-nav-toggle {
+                grid-area: menu;
+            }
+            .top-navbar .sopm-mobile-title {
+                grid-area: title;
+                justify-self: start;
+            }
+            .top-navbar .sopm-top-bar-actions {
+                grid-area: actions;
+                justify-self: end;
+                margin-left: 0 !important;
+            }
+            .top-navbar .search-shell {
+                grid-area: search;
+                flex: none;
+                max-width: none;
+                width: 100%;
             }
             .main-content > .sopm-page-body {
                 padding: 0.75rem !important;
@@ -886,28 +911,8 @@
             }
         }
         @media (max-width: 575.98px) {
-            .top-navbar {
-                flex-wrap: wrap;
-            }
-            .sopm-mobile-title {
-                order: 1;
-                flex: 1 1 auto;
-                min-width: 0;
-            }
-            .sopm-nav-toggle {
-                order: 0;
-            }
-            .search-shell {
-                order: 4;
-                flex: 1 1 100%;
-                min-width: 0;
-            }
-            .top-navbar > .d-flex.align-items-center.gap-2 {
-                order: 2;
-                margin-left: auto;
-            }
             #search-input::placeholder {
-                font-size: 0.75rem;
+                font-size: 0.8rem;
             }
         }
     </style>
@@ -992,7 +997,7 @@
             </div>
             <div id="search-results" class="position-absolute search-results-anchor"></div>
         </div>
-        <div class="d-flex align-items-center gap-2 flex-shrink-0 ms-auto">
+        <div class="sopm-top-bar-actions d-flex align-items-center gap-2 flex-shrink-0 ms-auto">
         {% if user.is_authenticated %}
         <button type="button"
                 class="sopm-announce-nav-btn"
