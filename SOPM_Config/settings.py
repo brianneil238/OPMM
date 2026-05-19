@@ -43,6 +43,11 @@ SOPM_ENABLE_DATABASE_RESTORE = os.environ.get(
     'SOPM_ENABLE_DATABASE_RESTORE', ''
 ).lower() in ('1', 'true', 'yes')
 
+AUTHENTICATION_BACKENDS = [
+    'core.auth_backends.CaseInsensitiveUsernameBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -100,6 +105,14 @@ def _postgres_url_with_sslmode(url: str) -> str:
     sep = '&' if '?' in url else '?'
     return f'{url}{sep}sslmode=require'
 
+
+if not DEBUG and not os.environ.get('DATABASE_URL'):
+    from django.core.exceptions import ImproperlyConfigured
+
+    raise ImproperlyConfigured(
+        'DATABASE_URL is not set. On Render, link the Postgres database to this web service '
+        '(Environment → DATABASE_URL). Without it, login and data use a temporary SQLite file.'
+    )
 
 _db_url = _postgres_url_with_sslmode(os.environ.get('DATABASE_URL', _default_db_url))
 DATABASES = {

@@ -253,10 +253,11 @@
                 <div class="col-lg-7 login-form-col">
                     <div class="login-form-eyebrow">Secure access</div>
                     <h1 class="login-form-heading">Staff sign in</h1>
-                    <p class="login-form-lead mb-0">Use your office username and password to open the dashboard.</p>
+                    <p class="login-form-lead mb-0">Use your office abbreviation and password after an admin registers you (e.g. OVCRDES).</p>
+                    <p class="text-muted small mb-0 mt-2">First-time on Render: sign in with the <strong>superuser</strong> from <code>ensure_superuser</code> or <code>createsuperuser</code> (often <strong>root</strong> or <strong>admin</strong>) — not your office code until it exists in User management.</p>
 
                     {% if form.errors %}
-                    <div class="alert alert-danger small py-2 mb-3" role="alert">Invalid username or password.</div>
+                    <div class="alert alert-danger small py-2 mb-3" role="alert">Invalid username or password. Check spelling and caps; office codes must be registered first.</div>
                     {% endif %}
 
                     <form method="post" action="{% url 'login' %}" class="mt-1">
