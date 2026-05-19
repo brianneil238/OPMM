@@ -9,6 +9,8 @@ cd path\to\SOPM
 python -m venv venv
 .\venv\Scripts\Activate.ps1
 pip install -r requirements.txt
+copy .env.example .env
+# Edit .env and paste your Render External DATABASE_URL (optional for local SQLite dev)
 python manage.py migrate
 python manage.py createsuperuser
 python manage.py runserver
@@ -105,9 +107,25 @@ This repo contains a [`render.yaml`](./render.yaml) blueprint that provisions a 
    - sets `DJANGO_DEBUG=false`, `DJANGO_ALLOWED_HOSTS=.onrender.com`, `DATABASE_SSL_REQUIRE=true`,
    - runs `build.sh` (installs deps, `collectstatic`, `migrate`) on every deploy,
    - starts the app with `gunicorn SOPM_Config.wsgi:application`.
-3. After the first deploy succeeds, open the Render **Shell** for the web service and create an admin account:
+3. Create an admin account (Render **free** plans do not include web shell access):
 
-   ```bash
+   **Option A — env vars on the web service (easiest):** In the Render dashboard → your web service → **Environment**, add:
+
+   | Key | Example |
+   |-----|---------|
+   | `DJANGO_SUPERUSER_USERNAME` | `admin` |
+   | `DJANGO_SUPERUSER_EMAIL` | `you@example.com` |
+   | `DJANGO_SUPERUSER_PASSWORD` | a strong password |
+
+   Trigger **Manual Deploy**. `build.sh` runs `createsuperuser --noinput` when those vars are set. **Remove `DJANGO_SUPERUSER_PASSWORD` (and the others if you like) after the deploy succeeds** so the password is not re-applied on every build.
+
+   **Option B — from your PC:** Copy the Postgres **External** connection string from Render → `sopm-db` → Connect. Save it once in a local `.env` file (see `.env.example`), or set it in the shell:
+
+   ```powershell
+   copy .env.example .env
+   # Edit .env: DATABASE_URL=postgresql://...  (?sslmode=require added automatically if missing)
+   $env:DJANGO_DEBUG="false"
+   python manage.py migrate
    python manage.py createsuperuser
    ```
 

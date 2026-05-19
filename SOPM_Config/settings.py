@@ -1,15 +1,25 @@
 ﻿import os
+import sys
 from pathlib import Path
 
 import dj_database_url
+from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Local dev: copy .env.example to .env and paste secrets there (file is gitignored).
+# Skip during ``manage.py test`` so production flags in .env do not break the test client.
+if 'test' not in sys.argv:
+    load_dotenv(BASE_DIR / '.env')
 
 SECRET_KEY = os.environ.get(
     'DJANGO_SECRET_KEY',
     'django-insecure-dev-only-change-for-production',
 )
-DEBUG = os.environ.get('DJANGO_DEBUG', 'true').lower() in ('1', 'true', 'yes')
+if 'test' in sys.argv:
+    DEBUG = True
+else:
+    DEBUG = os.environ.get('DJANGO_DEBUG', 'true').lower() in ('1', 'true', 'yes')
 
 _allowed = os.environ.get('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1')
 ALLOWED_HOSTS = [h.strip() for h in _allowed.split(',') if h.strip()]
@@ -79,9 +89,22 @@ WSGI_APPLICATION = 'SOPM_Config.wsgi.application'
 
 # Database: use ``DATABASE_URL`` when present (Render Postgres), fall back to local SQLite for dev.
 _default_db_url = f'sqlite:///{BASE_DIR / "db.sqlite3"}'
+
+
+def _postgres_url_with_sslmode(url: str) -> str:
+    """Append sslmode=require for Postgres when missing (Render external DB from PC)."""
+    if not url.startswith(('postgres://', 'postgresql://')):
+        return url
+    if 'sslmode=' in url.lower():
+        return url
+    sep = '&' if '?' in url else '?'
+    return f'{url}{sep}sslmode=require'
+
+
+_db_url = _postgres_url_with_sslmode(os.environ.get('DATABASE_URL', _default_db_url))
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.environ.get('DATABASE_URL', _default_db_url),
+        default=_db_url,
         conn_max_age=600,
         conn_health_checks=True,
         ssl_require=os.environ.get('DATABASE_SSL_REQUIRE', '').lower() in ('1', 'true', 'yes'),

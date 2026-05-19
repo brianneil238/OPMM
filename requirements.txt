@@ -3,6 +3,9 @@ Django>=6.0.4,<7
 python-docx>=1.2.0,<2
 openpyxl>=3.1.0,<4
 
+# Load DATABASE_URL and other secrets from a local .env file (dev only; not used on Render).
+python-dotenv>=1.0.0,<2
+
 # Production server + static files + Postgres for Render deployment.
 gunicorn>=22.0.0,<24
 whitenoise>=6.6.0,<7

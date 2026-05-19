@@ -2519,6 +2519,25 @@ class ViewSmokeTests(TestCase):
         self.assertContains(resp, 'All development areas')
         self.assertContains(resp, 'All offices (combined)')
 
+    def test_performance_viewer_paginates_without_loading_all_rows(self):
+        """Catalog pagination: page 2 works when total rows exceed page size (25)."""
+        call_command(
+            'seed_sample_data',
+            '--reset',
+            '--bulk-indicators',
+            '40',
+            '--bulk-quarters',
+            '1',
+            verbosity=0,
+        )
+        self.client.login(username='root', password='pass12345')
+        r1 = self.client.get(reverse('performance_viewer') + '?year=2026&quarter=all&area=all&page=1')
+        r2 = self.client.get(reverse('performance_viewer') + '?year=2026&quarter=all&area=all&page=2')
+        self.assertEqual(r1.status_code, 200)
+        self.assertEqual(r2.status_code, 200)
+        self.assertContains(r1, 'Rows 1–')
+        self.assertContains(r2, 'Rows 26–')
+
 
 class SearchSuggestionsHierarchyTests(TestCase):
     """Outcome / Strategy / PAP labels must be searchable (ingest stores office only on PAP rows)."""

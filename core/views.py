@@ -678,6 +678,52 @@ def _viewer_monitor_sort_parts(record):
     return (out_name.lower(), strat_name.lower(), pap_name.lower(), record.id)
 
 
+def _viewer_catalog_entry_from_record(record):
+    """Lightweight row descriptor for viewer pagination (avoids holding all ORM rows in memory)."""
+    return {
+        'pk': record.pk,
+        'quarter': record.quarter,
+        'sort_key': _viewer_monitor_sort_parts(record),
+        'area_key': _viewer_record_dev_area_key(record),
+        'status': record.status,
+        'pap_id': record.indicator.pap_id,
+        'indicator_id': record.indicator_id,
+    }
+
+
+def _viewer_build_row_catalog(queryset):
+    """Scan queryset once; return non-banner catalog entries (status/area computed once per row)."""
+    qs = queryset.select_related(
+        'indicator__pap__parent__parent',
+        'indicator__pap__office',
+    )
+    entries = []
+    for record in qs.iterator(chunk_size=500):
+        if record_is_pillar_banner_only(record):
+            continue
+        entries.append(_viewer_catalog_entry_from_record(record))
+    return entries
+
+
+def _viewer_sort_row_catalog(entries, *, view_all_quarters):
+    if view_all_quarters:
+        entries.sort(key=lambda e: (e['quarter'],) + e['sort_key'])
+    else:
+        entries.sort(key=lambda e: e['sort_key'])
+
+
+def _viewer_fetch_records_by_pks(pks):
+    """Load full ORM rows for a page/export slice, preserving ``pks`` order."""
+    if not pks:
+        return []
+    rows = PerformanceRecord.objects.filter(pk__in=pks).select_related(
+        'indicator__pap__parent__parent',
+        'indicator__pap__office',
+    )
+    by_pk = {r.pk: r for r in rows}
+    return [by_pk[pk] for pk in pks if pk in by_pk]
+
+
 # OPMM matrix: six development areas only (fixed order, like spreadsheet tabs).
 # Needles are matched against a compact lowercase alphanumeric blob (see
 # ``_viewer_record_dev_area_key``). Use distinctive phrases; order within a
@@ -1116,18 +1162,17 @@ def _performance_viewer_scope(request, *, export_mode=False):
                 view_all_quarters = True
 
         if view_all_quarters:
-            period_records = list(year_records)
+            period_qs = year_records
         else:
-            period_records = list(year_records.filter(quarter=quarter))
+            period_qs = year_records.filter(quarter=quarter)
 
-    # Pillar title rows must not appear as KPI lines or inflate MET counts per development area.
-    period_records = [r for r in period_records if not record_is_pillar_banner_only(r)]
+    period_catalog = _viewer_build_row_catalog(period_qs)
 
     counts = {spec['key']: {'met': 0, 'total': 0} for spec in VIEWER_DEVELOPMENT_AREAS}
-    for r in period_records:
-        key = _viewer_record_dev_area_key(r)
+    for entry in period_catalog:
+        key = entry['area_key']
         counts[key]['total'] += 1
-        if r.status == 'MET':
+        if entry['status'] == 'MET':
             counts[key]['met'] += 1
 
     development_areas = []
@@ -1152,7 +1197,7 @@ def _performance_viewer_scope(request, *, export_mode=False):
     )
     if export_mode:
         selected_area_id = VIEWER_AREA_ALL
-        area_records = list(period_records)
+        area_catalog = list(period_catalog)
         selected_area_name = 'All development areas'
     else:
         raw_area = (request.GET.get('area') or '').strip()
@@ -1178,10 +1223,10 @@ def _performance_viewer_scope(request, *, export_mode=False):
             selected_area_id = VIEWER_AREA_ALL
 
         if selected_area_id == VIEWER_AREA_ALL:
-            area_records = list(period_records)
+            area_catalog = list(period_catalog)
         else:
-            area_records = [
-                r for r in period_records if _viewer_record_dev_area_key(r) == selected_area_id
+            area_catalog = [
+                e for e in period_catalog if e['area_key'] == selected_area_id
             ]
 
         if selected_area_id == VIEWER_AREA_ALL:
@@ -1192,9 +1237,9 @@ def _performance_viewer_scope(request, *, export_mode=False):
                 '',
             )
 
-    total = len(area_records)
-    met = sum(1 for r in area_records if r.status == 'MET')
-    unmet = sum(1 for r in area_records if r.status == 'UNMET')
+    total = len(area_catalog)
+    met = sum(1 for e in area_catalog if e['status'] == 'MET')
+    unmet = sum(1 for e in area_catalog if e['status'] == 'UNMET')
     pending = total - met - unmet
     completion_pct = round((met / total) * 100) if total else 0
     met_pct = round((met / total) * 100) if total else 0
@@ -1202,7 +1247,7 @@ def _performance_viewer_scope(request, *, export_mode=False):
 
     if export_mode:
         status_filter = 'all'
-        scoped_records = area_records
+        scoped_catalog = area_catalog
     else:
         raw_status = (request.GET.get('status') or '').strip().lower()
         if raw_status in ('met', 'unmet', 'pending'):
@@ -1210,19 +1255,19 @@ def _performance_viewer_scope(request, *, export_mode=False):
         else:
             status_filter = 'all'
 
-        scoped_records = area_records
+        scoped_catalog = area_catalog
         if status_filter != 'all':
-            scoped_records = [
-                r for r in area_records if r.status.lower() == status_filter
+            scoped_catalog = [
+                e for e in area_catalog if e['status'].lower() == status_filter
             ]
 
-    indicator_rows_full = list(scoped_records)
-    if view_all_quarters:
-        indicator_rows_full.sort(
-            key=lambda r: (r.quarter,) + _viewer_monitor_sort_parts(r),
-        )
+    scoped_catalog = list(scoped_catalog)
+    _viewer_sort_row_catalog(scoped_catalog, view_all_quarters=view_all_quarters)
+
+    if export_mode:
+        indicator_rows_full = _viewer_fetch_records_by_pks([e['pk'] for e in scoped_catalog])
     else:
-        indicator_rows_full.sort(key=_viewer_monitor_sort_parts)
+        indicator_rows_full = None
 
     return {
         'available_offices': available_offices,
@@ -1248,6 +1293,7 @@ def _performance_viewer_scope(request, *, export_mode=False):
         'met_pct': met_pct,
         'unmet_pct': unmet_pct,
         'status_filter': status_filter,
+        'indicator_row_catalog': scoped_catalog,
         'indicator_rows_full': indicator_rows_full,
     }
 
@@ -1273,7 +1319,7 @@ def performance_viewer(request):
     selected_area_id = scope['selected_area_id']
     selected_area_name = scope['selected_area_name']
     status_filter = scope['status_filter']
-    indicator_rows_full = list(scope['indicator_rows_full'])
+    row_catalog = list(scope['indicator_row_catalog'])
 
     total = scope['total']
     met = scope['met']
@@ -1290,21 +1336,19 @@ def performance_viewer(request):
 
     if raw_record.isdigit():
         rid = int(raw_record)
-        for idx, r in enumerate(indicator_rows_full):
-            if r.pk == rid:
-                selected_record = r
+        for idx, entry in enumerate(row_catalog):
+            if entry['pk'] == rid:
                 page = idx // PAGE_SIZE + 1
                 break
 
     if selected_record is None and raw_indicator.isdigit():
         sid = int(raw_indicator)
-        for idx, r in enumerate(indicator_rows_full):
-            if r.indicator_id == sid:
-                selected_record = r
+        for idx, entry in enumerate(row_catalog):
+            if entry['indicator_id'] == sid:
                 page = idx // PAGE_SIZE + 1
                 break
 
-    num_rows_pre = len(indicator_rows_full)
+    num_rows_pre = len(row_catalog)
     num_pages_pre = max(1, ceil(num_rows_pre / PAGE_SIZE)) if num_rows_pre else 1
 
     if selected_record is None:
@@ -1317,43 +1361,56 @@ def performance_viewer(request):
     indicator_focus_active = raw_indicator.isdigit()
     if indicator_focus_active:
         sid = int(raw_indicator)
-        indicator_rows_full = [r for r in indicator_rows_full if r.indicator_id == sid]
-        if indicator_rows_full:
-            if selected_record is None or getattr(selected_record, 'indicator_id', None) != sid:
-                selected_record = indicator_rows_full[0]
+        row_catalog = [e for e in row_catalog if e['indicator_id'] == sid]
+        if row_catalog:
+            if raw_record.isdigit():
+                rid = int(raw_record)
+                match = next((e for e in row_catalog if e['pk'] == rid), None)
+                selected_pk = match['pk'] if match else row_catalog[0]['pk']
+            else:
+                selected_pk = row_catalog[0]['pk']
             page = 1
-            nlen = len(indicator_rows_full)
+            nlen = len(row_catalog)
             total = nlen
-            met = sum(1 for r in indicator_rows_full if r.status == 'MET')
-            unmet = sum(1 for r in indicator_rows_full if r.status == 'UNMET')
+            met = sum(1 for e in row_catalog if e['status'] == 'MET')
+            unmet = sum(1 for e in row_catalog if e['status'] == 'UNMET')
             pending = nlen - met - unmet
             completion_pct = round((met / nlen) * 100) if nlen else 0
             met_pct = round((met / nlen) * 100) if nlen else 0
             unmet_pct = round((unmet / nlen) * 100) if nlen else 0
         else:
-            selected_record = None
+            selected_pk = None
             total = met = unmet = pending = 0
             completion_pct = met_pct = unmet_pct = 0
+    else:
+        selected_pk = int(raw_record) if raw_record.isdigit() else None
 
-    pap_counts = Counter(r.indicator.pap_id for r in indicator_rows_full)
-    pap_running = {}
-    pap_kpi_meta_by_pk = {}
-    for r in indicator_rows_full:
-        pid = r.indicator.pap_id
-        pap_running[pid] = pap_running.get(pid, 0) + 1
-        pap_kpi_meta_by_pk[r.pk] = {
-            'pap_kpi_index': pap_running[pid],
-            'pap_kpi_total': pap_counts[pid],
-        }
+    pap_counts = Counter(e['pap_id'] for e in row_catalog)
 
-    num_rows = len(indicator_rows_full)
+    num_rows = len(row_catalog)
     num_pages = max(1, ceil(num_rows / PAGE_SIZE)) if num_rows else 1
     if not indicator_focus_active and selected_record is None:
         page = max(1, min(num_pages, page))
 
     start = (page - 1) * PAGE_SIZE
-    indicator_rows = indicator_rows_full[start : start + PAGE_SIZE]
+    page_catalog = row_catalog[start : start + PAGE_SIZE]
+    page_pks = [e['pk'] for e in page_catalog]
+    indicator_rows = _viewer_fetch_records_by_pks(page_pks)
     page_end_index = start + len(indicator_rows)
+
+    if selected_pk is not None:
+        selected_rows = _viewer_fetch_records_by_pks([selected_pk])
+        selected_record = selected_rows[0] if selected_rows else None
+
+    pap_running = {}
+    pap_kpi_meta_by_pk = {}
+    for entry in page_catalog:
+        pid = entry['pap_id']
+        pap_running[pid] = pap_running.get(pid, 0) + 1
+        pap_kpi_meta_by_pk[entry['pk']] = {
+            'pap_kpi_index': pap_running[pid],
+            'pap_kpi_total': pap_counts[pid],
+        }
 
     for r in indicator_rows:
         _annotate_record_matrix_columns(r)

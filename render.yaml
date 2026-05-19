@@ -24,7 +24,7 @@ services:
     buildCommand: "./build.sh"
     startCommand: "gunicorn SOPM_Config.wsgi:application --workers 2 --threads 4 --timeout 90 --log-file -"
     autoDeploy: true
-    healthCheckPath: /login/
+    healthCheckPath: /accounts/login/
     envVars:
       - key: PYTHON_VERSION
         value: "3.12.6"
