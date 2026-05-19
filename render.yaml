@@ -1,0 +1,46 @@
+# Render Blueprint for SOPM (Django).
+#
+# Deploy steps:
+#   1. Push this repo to GitHub.
+#   2. In Render: New + > Blueprint, point at this repo, click Apply.
+#   3. After the first build, open the web shell and create a superuser:
+#        python manage.py createsuperuser
+#
+# The blueprint provisions a free Postgres instance and wires DATABASE_URL into the web service.
+
+databases:
+  - name: sopm-db
+    plan: free
+    databaseName: sopm
+    user: sopm
+
+services:
+  - type: web
+    name: sopm
+    runtime: python
+    plan: free
+    region: oregon
+    branch: main
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn SOPM_Config.wsgi:application --workers 2 --threads 4 --timeout 90 --log-file -"
+    autoDeploy: true
+    healthCheckPath: /login/
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.6"
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DJANGO_DEBUG
+        value: "false"
+      - key: DJANGO_ALLOWED_HOSTS
+        value: ".onrender.com"
+      - key: DJANGO_SECURE_SSL_REDIRECT
+        value: "true"
+      - key: DATABASE_SSL_REQUIRE
+        value: "true"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: sopm-db
+          property: connectionString
+      - key: WEB_CONCURRENCY
+        value: "2"

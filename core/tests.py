@@ -19,10 +19,13 @@ from .services import (
     _detect_quarter_year,
     _extract_opmm_section_banner,
     _explicit_met_unmet_from_accomplishment_tail,
+    _parse_explicit_met_unmet_cell,
+    _row_is_pure_opmm_section_banner_row,
     extract_actual_for_monitor,
     extract_number,
     extract_target_for_monitor,
     ingest_excel_monitor,
+    record_is_pillar_banner_only,
     ingest_word_monitor,
 )
 from .views import (
@@ -117,6 +120,448 @@ def _build_word_merged_continuation_row_docx(path):
     r4[4].text = 'Narrative about sessions for row two.'
     r4[5].text = 'N/A'
     r4[6].text = ''
+    doc.save(path)
+
+
+def _build_word_matrix_header_row0_four_kpis_docx(path):
+    """OPMM header on row 0 with KPIs on rows 1–4 (regression: data_start must not skip rows 1–2)."""
+    doc = Document()
+    doc.add_paragraph('OPMM Research and Innovation FY 2024')
+    table = doc.add_table(rows=5, cols=7)
+    hdr = [
+        'Outcome (2)',
+        'Strategy/ies (3)',
+        'PAP (4)',
+        'Performance Indicator/s (5)',
+        'Actual Accomplishments (6)',
+        'Variance (7)',
+        'Remarks (8)',
+    ]
+    for ci, h in enumerate(hdr):
+        table.rows[0].cells[ci].text = h
+    kpi_rows = [
+        (
+            'RESEARCH AND INNOVATION: Engineering solutions',
+            'Strategy R1',
+            'PAP R1',
+            'Publications in high-impact journals target (10)',
+            'Narrative accomplishment text for KPI one exceeds forty characters total.',
+            'MET',
+            '',
+        ),
+        (
+            'RESEARCH AND INNOVATION: Engineering solutions',
+            'Strategy R1',
+            'PAP R1',
+            'External research funding target (50)',
+            'Second KPI narrative accomplishment text is also longer than forty chars.',
+            'UNMET',
+            '',
+        ),
+        (
+            'RESEARCH AND INNOVATION: Engineering solutions',
+            'Strategy R1',
+            'PAP R1',
+            'Patents filed target (4)',
+            'Third KPI narrative accomplishment text is longer than forty characters here.',
+            'MET',
+            '',
+        ),
+        (
+            'RESEARCH AND INNOVATION: Engineering solutions',
+            'Strategy R1',
+            'PAP R1',
+            'Innovation workshops target (12)',
+            'Fourth KPI narrative accomplishment text exceeds forty characters as required.',
+            'MET',
+            '',
+        ),
+    ]
+    for ri, cells in enumerate(kpi_rows, start=1):
+        for ci, val in enumerate(cells):
+            table.rows[ri].cells[ci].text = val
+    doc.save(path)
+
+
+def _build_word_social_banner_row_plus_two_kpis_docx(path):
+    """Pillar title repeated across columns + MET (must not ingest); then two real KPI rows."""
+    doc = Document()
+    doc.add_paragraph('OPERATIONAL PLAN MONITORING MATRIX For 1st Quarter 2026')
+    table = doc.add_table(rows=6, cols=7)
+    hdr = [
+        'Outcome (2)',
+        'Strategy/ies (3)',
+        'PAP (4)',
+        'Performance Indicator/s (5)',
+        'Actual Accomplishments (6)',
+        'Variance (7)',
+        'Remarks (8)',
+    ]
+    for ci, h in enumerate(hdr):
+        table.rows[2].cells[ci].text = h
+    banner = 'SOCIAL RESPONSIBILITY: Engineering Pathways for Families and Communities'
+    rb = table.rows[3].cells
+    for j in range(4):
+        rb[j].text = banner
+    rb[4].text = '—'
+    rb[5].text = 'MET'
+    rb[6].text = ''
+    sr_out = banner
+    r4 = table.rows[4].cells
+    r4[0].text = sr_out
+    r4[1].text = 'Strategy for community engagement'
+    r4[2].text = 'Engineering Pathways PAP'
+    r4[3].text = 'Number of community outreach programs conducted (12)'
+    r4[4].text = 'Narrative for outreach programs exceeds forty characters minimum length.'
+    r4[5].text = 'MET'
+    r5 = table.rows[5].cells
+    r5[0].text = sr_out
+    r5[1].text = 'Strategy for community engagement'
+    r5[2].text = 'Engineering Pathways PAP'
+    r5[3].text = 'Number of families served through engineering pathways (50)'
+    r5[4].text = 'Narrative for families served exceeds forty characters minimum length.'
+    r5[5].text = 'UNMET'
+    doc.save(path)
+
+
+def _build_word_ri_banner_young_lifters_writeshop_docx(path):
+    """R&I pillar banner row + two KPIs (Young LIFTERS then Writeshop), matching OVCRDES Word layout."""
+    doc = Document()
+    doc.add_paragraph('OPERATIONAL PLAN MONITORING MATRIX For 1st Quarter 2024')
+    table = doc.add_table(rows=6, cols=7)
+    hdr = [
+        'Outcome (2)',
+        'Strategy/ies (3)',
+        'PAP (4)',
+        'Performance Indicator/s (5)',
+        'Actual Accomplishments (6)',
+        'Variance (7)',
+        'Remarks (8)',
+    ]
+    for ci, h in enumerate(hdr):
+        table.rows[2].cells[ci].text = h
+    pillar = 'RESEARCH AND INNOVATION: Engineering Innovative Solutions for Sustainable Development'
+    rb = table.rows[3].cells
+    for j in range(7):
+        rb[j].text = pillar if j < 4 else ''
+    rb[5].text = ''
+    rb[6].text = ''
+    r4 = table.rows[4].cells
+    r4[0].text = 'University Research and Innovation Ecosystem Advanced'
+    r4[1].text = 'Promote cross-disciplinary and interdisciplinary research collaborations'
+    r4[2].text = 'Young Leadership and Innovation for Future Thinkers (Young LIFTERS) Program'
+    r4[3].text = 'Number of students participated in the program'
+    r4[4].text = (
+        'One (1) implemented monitoring of research projects of YLP mentees '
+        'with sufficient narrative length for ingest.'
+    )
+    r4[5].text = 'MET'
+    r4[6].text = 'RMS conducted monitoring and assessed the progress of YLP research project.'
+    r5 = table.rows[5].cells
+    r5[0].text = ''
+    r5[1].text = 'Strengthen capability building of researchers in different fields'
+    r5[2].text = 'Regular Writeshops Kapehan and HUNTahan Session'
+    r5[3].text = 'Number of conducted writeshop/HUNTahan Session'
+    r5[4].text = 'Zero (0) regular Writeshops, Kapehan and HUNTahan Session'
+    r5[5].text = 'N/A'
+    r5[6].text = (
+        'The target was initially set for the first quarter; funds may move to Q2. '
+        'Best Practices: offer relevant training and support for faculty research.'
+    )
+    doc.save(path)
+
+
+def _build_word_ri_first_kpi_pillar_cloned_in_hierarchy_docx(path):
+    """Word merge: pillar title cloned into Outcome–Indicator cells; accomplishment is still KPI data."""
+    doc = Document()
+    doc.add_paragraph('OPERATIONAL PLAN MONITORING MATRIX For 1st Quarter 2024')
+    table = doc.add_table(rows=5, cols=7)
+    hdr = [
+        'Outcome (2)',
+        'Strategy/ies (3)',
+        'PAP (4)',
+        'Performance Indicator/s (5)',
+        'Actual Accomplishments (6)',
+        'Variance (7)',
+        'Remarks (8)',
+    ]
+    for ci, h in enumerate(hdr):
+        table.rows[2].cells[ci].text = h
+    pillar = 'RESEARCH AND INNOVATION: Engineering Innovative Solutions for Sustainable Development'
+    r4 = table.rows[3].cells
+    for j in range(4):
+        r4[j].text = pillar
+    r4[4].text = (
+        'One (1) implemented monitoring of research projects of YLP mentees '
+        'with sufficient narrative length for ingest.'
+    )
+    r4[5].text = 'MET'
+    r5 = table.rows[4].cells
+    r5[0].text = ''
+    r5[1].text = 'Strengthen capability building of researchers in different fields'
+    r5[2].text = 'Regular Writeshops Kapehan and HUNTahan Session'
+    r5[3].text = 'Number of conducted writeshop/HUNTahan Session'
+    r5[4].text = 'Zero (0) regular Writeshops, Kapehan and HUNTahan Session'
+    r5[5].text = 'N/A'
+    doc.save(path)
+
+
+def _build_word_ri_first_kpi_duplicate_outcome_strategy_docx(path):
+    """Word merge quirk: Outcome text duplicated in Strategy on the first KPI row (must still ingest)."""
+    doc = Document()
+    doc.add_paragraph('OPERATIONAL PLAN MONITORING MATRIX For 1st Quarter 2024')
+    table = doc.add_table(rows=5, cols=7)
+    hdr = [
+        'Outcome (2)',
+        'Strategy/ies (3)',
+        'PAP (4)',
+        'Performance Indicator/s (5)',
+        'Actual Accomplishments (6)',
+        'Variance (7)',
+        'Remarks (8)',
+    ]
+    for ci, h in enumerate(hdr):
+        table.rows[2].cells[ci].text = h
+    uni = 'University Research and Innovation Ecosystem Advanced'
+    r4 = table.rows[3].cells
+    r4[0].text = uni
+    r4[1].text = uni
+    r4[2].text = 'Young Leadership and Innovation for Future Thinkers (Young LIFTERS) Program'
+    r4[3].text = 'Number of students participated in the program'
+    r4[4].text = (
+        'One (1) implemented monitoring of research projects of YLP mentees '
+        'with sufficient narrative length for ingest.'
+    )
+    r4[5].text = 'MET'
+    r5 = table.rows[4].cells
+    r5[0].text = ''
+    r5[1].text = 'Strengthen capability building of researchers in different fields'
+    r5[2].text = 'Regular Writeshops Kapehan and HUNTahan Session'
+    r5[3].text = 'Number of conducted writeshop/HUNTahan Session'
+    r5[4].text = 'Zero (0) regular Writeshops, Kapehan and HUNTahan Session'
+    r5[5].text = 'N/A'
+    doc.save(path)
+
+
+def _build_word_ovcrdes_ri_four_kpis_merged_blanks_docx(path):
+    """OVCRDES-style R&I block: two PAPs × two KPI rows; rows 4 and 6 have blank merged hierarchy."""
+    doc = Document()
+    doc.add_paragraph('OPERATIONAL PLAN MONITORING MATRIX For 1st Quarter 2024')
+    table = doc.add_table(rows=7, cols=7)
+    hdr = [
+        'Outcome (2)',
+        'Strategy/ies (3)',
+        'PAP (4)',
+        'Performance Indicator/s (5)',
+        'Actual Accomplishments (6)',
+        'Variance (7)',
+        'Remarks (8)',
+    ]
+    for ci, h in enumerate(hdr):
+        table.rows[2].cells[ci].text = h
+    ri_out = (
+        'RESEARCH AND INNOVATION: Engineering Innovative Solutions for Sustainable Development'
+    )
+    st = 'Strengthen campus research niching'
+    pap_y = 'Young LIFTers Program for targeted students'
+    pap_f = 'Fintech Applications Development Program for BatStateU Lipa'
+    r3 = table.rows[3].cells
+    r3[0].text, r3[1].text, r3[2].text = ri_out, st, pap_y
+    r3[3].text = 'Number of students participated in the program (100)'
+    r3[4].text = 'Narrative for students KPI exceeds forty characters minimum length.'
+    r3[5].text = 'MET'
+    r4 = table.rows[4].cells
+    for j in range(3):
+        r4[j].text = ''
+    r4[3].text = 'Number of conducted writeshop HUNTahan Session (10)'
+    r4[4].text = 'Narrative for writeshop KPI exceeds forty characters minimum length.'
+    r4[5].text = 'MET'
+    r5 = table.rows[5].cells
+    r5[0].text, r5[1].text, r5[2].text = ri_out, st, pap_f
+    r5[3].text = 'Number of capacity-building programs conducted focused on research publication (8)'
+    r5[4].text = 'Narrative for capacity building KPI exceeds forty characters minimum length.'
+    r5[5].text = 'MET'
+    r6 = table.rows[6].cells
+    for j in range(3):
+        r6[j].text = ''
+    r6[3].text = (
+        'Number of Concept Proposal Development and Ideation for the Fintech Research Center conducted (6)'
+    )
+    r6[4].text = 'Narrative for concept proposal KPI exceeds forty characters minimum length.'
+    r6[5].text = 'MET'
+    doc.save(path)
+
+
+def _build_word_ovcrdes_ri_four_kpis_empty_indicator_continuation_docx(path):
+    """Like merged hierarchy blanks, but indicator column is empty on continuation rows (Word merge)."""
+    doc = Document()
+    doc.add_paragraph('OPERATIONAL PLAN MONITORING MATRIX For 1st Quarter 2024')
+    table = doc.add_table(rows=7, cols=7)
+    hdr = [
+        'Outcome (2)',
+        'Strategy/ies (3)',
+        'PAP (4)',
+        'Performance Indicator/s (5)',
+        'Actual Accomplishments (6)',
+        'Variance (7)',
+        'Remarks (8)',
+    ]
+    for ci, h in enumerate(hdr):
+        table.rows[2].cells[ci].text = h
+    ri_out = (
+        'RESEARCH AND INNOVATION: Engineering Innovative Solutions for Sustainable Development'
+    )
+    st = 'Strengthen campus research niching'
+    pap_y = 'Young LIFTers Program for targeted students'
+    pap_f = 'Fintech Applications Development Program for BatStateU Lipa'
+    r3 = table.rows[3].cells
+    r3[0].text, r3[1].text, r3[2].text = ri_out, st, pap_y
+    r3[3].text = 'Number of students participated in the program (100)'
+    r3[4].text = 'Narrative for students KPI exceeds forty characters minimum length.'
+    r3[5].text = 'MET'
+    r4 = table.rows[4].cells
+    for j in range(3):
+        r4[j].text = ''
+    r4[3].text = ''
+    r4[4].text = 'Narrative for writeshop KPI exceeds forty characters minimum length.'
+    r4[5].text = 'MET'
+    r5 = table.rows[5].cells
+    r5[0].text, r5[1].text, r5[2].text = ri_out, st, pap_f
+    r5[3].text = 'Number of capacity-building programs conducted focused on research publication (8)'
+    r5[4].text = 'Narrative for capacity building KPI exceeds forty characters minimum length.'
+    r5[5].text = 'MET'
+    r6 = table.rows[6].cells
+    for j in range(3):
+        r6[j].text = ''
+    r6[3].text = ''
+    r6[4].text = 'Narrative for concept proposal KPI exceeds forty characters minimum length.'
+    r6[5].text = 'MET'
+    doc.save(path)
+
+
+def _build_word_ovcrdes_ri_four_kpis_empty_indicator_short_narrative_docx(path):
+    """Empty indicator on continuation rows with accomplishment text under 18 chars (strict-KPI false)."""
+    doc = Document()
+    doc.add_paragraph('OPERATIONAL PLAN MONITORING MATRIX For 1st Quarter 2024')
+    table = doc.add_table(rows=7, cols=7)
+    hdr = [
+        'Outcome (2)',
+        'Strategy/ies (3)',
+        'PAP (4)',
+        'Performance Indicator/s (5)',
+        'Actual Accomplishments (6)',
+        'Variance (7)',
+        'Remarks (8)',
+    ]
+    for ci, h in enumerate(hdr):
+        table.rows[2].cells[ci].text = h
+    ri_out = (
+        'RESEARCH AND INNOVATION: Engineering Innovative Solutions for Sustainable Development'
+    )
+    st = 'Strengthen campus research niching'
+    pap_y = 'Young LIFTers Program for targeted students'
+    pap_f = 'Fintech Applications Development Program for BatStateU Lipa'
+    r3 = table.rows[3].cells
+    r3[0].text, r3[1].text, r3[2].text = ri_out, st, pap_y
+    r3[3].text = 'Number of students participated in the program (100)'
+    r3[4].text = 'Narrative for students KPI exceeds forty characters minimum length.'
+    r3[5].text = 'MET'
+    r4 = table.rows[4].cells
+    for j in range(3):
+        r4[j].text = ''
+    r4[3].text = ''
+    r4[4].text = 'Short ac'
+    r4[5].text = 'MET'
+    r5 = table.rows[5].cells
+    r5[0].text, r5[1].text, r5[2].text = ri_out, st, pap_f
+    r5[3].text = 'Number of capacity-building programs conducted focused on research publication (8)'
+    r5[4].text = 'Narrative for capacity building KPI exceeds forty characters minimum length.'
+    r5[5].text = 'MET'
+    r6 = table.rows[6].cells
+    for j in range(3):
+        r6[j].text = ''
+    r6[3].text = ''
+    r6[4].text = 'Tiny'
+    r6[5].text = 'MET'
+    doc.save(path)
+
+
+def _build_word_opmm_duplicate_indicator_column_two_rows_docx(path):
+    """Two body rows with identical indicator cell text (Word merge repeat); accomplishments differ."""
+    doc = Document()
+    doc.add_paragraph('OPERATIONAL PLAN MONITORING MATRIX For 2nd Quarter 2026')
+    table = doc.add_table(rows=5, cols=7)
+    hdr = [
+        'Outcome (2)',
+        'Strategy/ies (3)',
+        'PAP (4)',
+        'Performance Indicator/s (5)',
+        'Actual Accomplishments (6)',
+        'Variance (7)',
+        'Remarks (8)',
+    ]
+    for ci, h in enumerate(hdr):
+        table.rows[2].cells[ci].text = h
+    row_a = (
+        'OUTCOME ONE',
+        'Strategy one',
+        'PAP one',
+        'Shared KPI title with target (99)',
+        'First narrative accomplishment is longer than forty characters as required here.',
+        'MET',
+        '',
+    )
+    row_b = (
+        'OUTCOME ONE',
+        'Strategy one',
+        'PAP one',
+        'Shared KPI title with target (99)',
+        'Second narrative accomplishment is also longer than forty characters for uniqueness.',
+        'UNMET',
+        '',
+    )
+    for ri, cells in enumerate([row_a, row_b], start=3):
+        for ci, val in enumerate(cells):
+            table.rows[ri].cells[ci].text = val
+    doc.save(path)
+
+
+def _build_word_opmm_duplicate_indicator_cell_four_rows_docx(path):
+    """Four body rows share one merged indicator label; accomplishments differ (4 → 3 regression)."""
+    doc = Document()
+    doc.add_paragraph('OPERATIONAL PLAN MONITORING MATRIX For 2nd Quarter 2026')
+    table = doc.add_table(rows=7, cols=7)
+    hdr = [
+        'Outcome (2)',
+        'Strategy/ies (3)',
+        'PAP (4)',
+        'Performance Indicator/s (5)',
+        'Actual Accomplishments (6)',
+        'Variance (7)',
+        'Remarks (8)',
+    ]
+    for ci, h in enumerate(hdr):
+        table.rows[2].cells[ci].text = h
+    shared = 'Shared KPI title with target (99)'
+    narratives = [
+        'First narrative accomplishment is longer than forty characters as required here.',
+        'Second narrative accomplishment is also longer than forty characters for uniqueness.',
+        'Third narrative accomplishment is also longer than forty characters for uniqueness.',
+        'Fourth narrative accomplishment is also longer than forty characters for uniqueness.',
+    ]
+    stats = ['MET', 'UNMET', 'MET', 'MET']
+    for k in range(4):
+        row = (
+            'OUTCOME ONE',
+            'Strategy one',
+            'PAP one',
+            shared,
+            narratives[k],
+            stats[k],
+            '',
+        )
+        for ci, val in enumerate(row):
+            table.rows[3 + k].cells[ci].text = val
     doc.save(path)
 
 
@@ -226,6 +671,98 @@ class MonitorExtractTests(TestCase):
         self.assertIsNotNone(t)
         self.assertRegex(t, r'(?i)research\s+and\s+innovation')
 
+    def test_pure_section_banner_row_detects_repeated_pillar_columns(self):
+        banner = 'SOCIAL RESPONSIBILITY: Engineering Pathways for Families and Communities'
+        self.assertTrue(
+            _row_is_pure_opmm_section_banner_row(banner, banner, banner, banner, '—', 'MET', '')
+        )
+        self.assertFalse(
+            _row_is_pure_opmm_section_banner_row(
+                banner,
+                'Strategy for community engagement',
+                'Engineering Pathways PAP',
+                'Number of community outreach programs conducted (12)',
+                'Narrative for outreach programs exceeds forty characters minimum length.',
+                'MET',
+                '',
+            )
+        )
+
+
+class VarianceMetUnmetRuleTests(TestCase):
+    """Numeric variance: ``>= 0`` is MET, anything below 0 is UNMET (plain ``0`` is MET)."""
+
+    def test_zero_variance_is_met(self):
+        self.assertEqual(_parse_explicit_met_unmet_cell('0'), 'MET')
+        self.assertEqual(_parse_explicit_met_unmet_cell(' 0 '), 'MET')
+        self.assertEqual(_parse_explicit_met_unmet_cell('+0'), 'MET')
+        self.assertEqual(_parse_explicit_met_unmet_cell('-0'), 'MET')
+        self.assertEqual(_parse_explicit_met_unmet_cell('0%'), 'MET')
+
+    def test_positive_variance_is_met(self):
+        self.assertEqual(_parse_explicit_met_unmet_cell('5'), 'MET')
+        self.assertEqual(_parse_explicit_met_unmet_cell('+5'), 'MET')
+        self.assertEqual(_parse_explicit_met_unmet_cell('+12.5'), 'MET')
+        self.assertEqual(_parse_explicit_met_unmet_cell('+5%'), 'MET')
+
+    def test_negative_variance_is_unmet(self):
+        self.assertEqual(_parse_explicit_met_unmet_cell('-1'), 'UNMET')
+        self.assertEqual(_parse_explicit_met_unmet_cell('-12'), 'UNMET')
+        self.assertEqual(_parse_explicit_met_unmet_cell('-3.5'), 'UNMET')
+        self.assertEqual(_parse_explicit_met_unmet_cell('-3%'), 'UNMET')
+
+    def test_record_status_uses_variance_over_numeric_target(self):
+        office = Office.objects.create(name='VarianceRuleOffice')
+        out = StrategicLevel.objects.create(name='Outcome', level_type='OUTCOME')
+        st = StrategicLevel.objects.create(name='Strategy', level_type='STRATEGY', parent=out)
+        pap = StrategicLevel.objects.create(
+            name='PAP', level_type='PAP', parent=st, office=office
+        )
+        ind = Indicator.objects.create(pap=pap, description='Variance rule indicator')
+        rec_zero = PerformanceRecord.objects.create(
+            indicator=ind, quarter=1, year=2026, target_value=10, actual_value=10,
+            variance_text='0',
+        )
+        self.assertEqual(rec_zero.status, 'MET')
+        rec_zero.delete()
+        rec_neg = PerformanceRecord.objects.create(
+            indicator=ind, quarter=1, year=2026, target_value=10, actual_value=8,
+            variance_text='-2',
+        )
+        self.assertEqual(rec_neg.status, 'UNMET')
+
+
+class ViewerDevAreaClassifyTests(TestCase):
+    """Regression: pillar matching order must not hide R&I rows that mention ``extension`` in text."""
+
+    def test_research_and_innovation_wins_when_blob_contains_extension_substring(self):
+        from core.views import _viewer_dev_area_key_from_compact_text
+
+        blob = 'researchandinnovationengineeringprogramdeadlineextensiongranted'
+        self.assertEqual(
+            _viewer_dev_area_key_from_compact_text(blob),
+            'research_and_innovation',
+        )
+
+
+class ViewerOutcomeFirstBucketTests(TestCase):
+    def test_ri_outcome_beats_extension_word_in_indicator_text(self):
+        from core.views import _viewer_record_dev_area_key
+
+        office = Office.objects.create(name='OfficeViewerRiExtTest')
+        out = StrategicLevel.objects.create(
+            name='RESEARCH AND INNOVATION: Engineering Innovative Solutions for Sustainable Development',
+            level_type='OUTCOME',
+        )
+        st = StrategicLevel.objects.create(name='Strategy line', level_type='STRATEGY', parent=out)
+        pap = StrategicLevel.objects.create(name='PAP line', level_type='PAP', parent=st, office=office)
+        ind = Indicator.objects.create(
+            pap=pap,
+            description='Please approve a one-week extension for reporting (deadline note).',
+        )
+        rec = PerformanceRecord.objects.create(indicator=ind, quarter=2, year=2026)
+        self.assertEqual(_viewer_record_dev_area_key(rec), 'research_and_innovation')
+
 
 class DetectQuarterYearTests(TestCase):
     def test_second_quarter_and_year(self):
@@ -334,6 +871,402 @@ class IngestWordMonitorTests(TestCase):
         descs = {r.indicator.description for r in recs}
         self.assertTrue(any('students' in d.lower() for d in descs))
         self.assertTrue(any('sessions' in d.lower() for d in descs))
+
+    def test_word_header_row_zero_ingests_all_kpis(self):
+        """When the matrix header is row 0, KPIs on rows 1–4 must all ingest (not only rows 3–4)."""
+        with tempfile.NamedTemporaryFile(suffix='.docx', delete=False) as tmp:
+            tmp.close()
+            path = tmp.name
+        try:
+            _build_word_matrix_header_row0_four_kpis_docx(path)
+            n = ingest_word_monitor(path, office_name='EarlyHeaderOffice', quarter=4, year=2024)
+        finally:
+            if os.path.isfile(path):
+                os.unlink(path)
+
+        self.assertEqual(n, 4)
+        recs = PerformanceRecord.objects.filter(
+            quarter=4, year=2024, indicator__pap__office__name='EarlyHeaderOffice'
+        ).select_related('indicator')
+        self.assertEqual(recs.count(), 4)
+        descs = {r.indicator.description for r in recs}
+        self.assertIn('Publications in high-impact journals target (10)', descs)
+        self.assertIn('External research funding target (50)', descs)
+        self.assertIn('Patents filed target (4)', descs)
+        self.assertIn('Innovation workshops target (12)', descs)
+
+    def test_word_ovcrdes_research_block_four_kpis_merged_parents(self):
+        """Two PAPs under one R&I outcome; continuation rows have empty merged Outcome/Strategy/PAP."""
+        with tempfile.NamedTemporaryFile(suffix='.docx', delete=False) as tmp:
+            tmp.close()
+            path = tmp.name
+        try:
+            _build_word_ovcrdes_ri_four_kpis_merged_blanks_docx(path)
+            n = ingest_word_monitor(path, office_name='OVCRDESBlock', quarter=1, year=2024)
+        finally:
+            if os.path.isfile(path):
+                os.unlink(path)
+
+        self.assertEqual(n, 4)
+        recs = PerformanceRecord.objects.filter(
+            quarter=1, year=2024, indicator__pap__office__name='OVCRDESBlock'
+        ).select_related('indicator', 'indicator__pap')
+        self.assertEqual(recs.count(), 4)
+        pap_names = {r.indicator.pap.name for r in recs}
+        self.assertEqual(
+            pap_names,
+            {
+                'Young LIFTers Program for targeted students',
+                'Fintech Applications Development Program for BatStateU Lipa',
+            },
+        )
+        descs = {r.indicator.description for r in recs}
+        self.assertTrue(any('students participated' in d.lower() for d in descs))
+        self.assertTrue(any('writeshop' in d.lower() and 'hunt' in d.lower() for d in descs))
+        self.assertTrue(any('capacity-building' in d.lower() for d in descs))
+        self.assertTrue(any('concept proposal' in d.lower() and 'fintech' in d.lower() for d in descs))
+
+    def test_word_ovcrdes_four_kpis_empty_indicator_continuation_not_skipped(self):
+        """Continuation rows with pillar match but blank indicator cell must still ingest."""
+        with tempfile.NamedTemporaryFile(suffix='.docx', delete=False) as tmp:
+            tmp.close()
+            path = tmp.name
+        try:
+            _build_word_ovcrdes_ri_four_kpis_empty_indicator_continuation_docx(path)
+            n = ingest_word_monitor(path, office_name='OVCRDESEmptyInd', quarter=1, year=2024)
+        finally:
+            if os.path.isfile(path):
+                os.unlink(path)
+
+        self.assertEqual(n, 4)
+        recs = PerformanceRecord.objects.filter(
+            quarter=1, year=2024, indicator__pap__office__name='OVCRDESEmptyInd'
+        ).select_related('indicator', 'indicator__pap')
+        self.assertEqual(recs.count(), 4)
+
+    def test_word_ovcrdes_four_kpis_empty_indicator_short_ac_still_ingests(self):
+        """Continuation with very short accomplishment must not be dropped as non-KPI / banner."""
+        with tempfile.NamedTemporaryFile(suffix='.docx', delete=False) as tmp:
+            tmp.close()
+            path = tmp.name
+        try:
+            _build_word_ovcrdes_ri_four_kpis_empty_indicator_short_narrative_docx(path)
+            n = ingest_word_monitor(path, office_name='OVCRDESShortAc', quarter=1, year=2024)
+        finally:
+            if os.path.isfile(path):
+                os.unlink(path)
+
+        self.assertEqual(n, 4)
+        self.assertEqual(
+            PerformanceRecord.objects.filter(
+                quarter=1, year=2024, indicator__pap__office__name='OVCRDESShortAc'
+            ).count(),
+            4,
+        )
+
+    def test_word_duplicate_indicator_cell_two_rows_two_performance_records(self):
+        """Same indicator text on consecutive rows must not collapse to one DB row per quarter."""
+        with tempfile.NamedTemporaryFile(suffix='.docx', delete=False) as tmp:
+            tmp.close()
+            path = tmp.name
+        try:
+            _build_word_opmm_duplicate_indicator_column_two_rows_docx(path)
+            ingest_word_monitor(path, office_name='DupIndOffice', quarter=2, year=2026)
+        finally:
+            if os.path.isfile(path):
+                os.unlink(path)
+
+        recs = list(
+            PerformanceRecord.objects.filter(
+                quarter=2, year=2026, indicator__pap__office__name='DupIndOffice'
+            ).select_related('indicator')
+        )
+        self.assertEqual(len(recs), 2)
+        self.assertEqual(len({r.indicator_id for r in recs}), 2)
+        texts = {r.indicator.description for r in recs}
+        self.assertTrue(any('Shared KPI title with target (99)' in t for t in texts))
+        self.assertTrue(any('· row' in t for t in texts))
+
+    def test_word_user_layout_banner_above_headers_two_kpis_both_ingested(self):
+        """User-reported layout: pillar banner above column headers + 2 KPIs (second has merged Outcome).
+
+        Mirrors the OVCRDES Q1 2024 monitor where ``RESEARCH AND INNOVATION: …`` spans the
+        first row, column headers ``(2) Outcome … (8) Remarks`` follow, then two KPI rows
+        where the second row vertically merges the Outcome cell with the first row.
+        Both KPIs MUST be stored as ``PerformanceRecord`` rows.
+        """
+        with tempfile.NamedTemporaryFile(suffix='.docx', delete=False) as tmp:
+            tmp.close()
+            path = tmp.name
+        try:
+            doc = Document()
+            doc.add_paragraph('OPERATIONAL PLAN MONITORING MATRIX For 1st Quarter 2024')
+            table = doc.add_table(rows=4, cols=7)
+            banner = 'RESEARCH AND INNOVATION: Engineering Innovative Solutions for Sustainable Development'
+            for ci in range(7):
+                table.rows[0].cells[ci].text = banner
+            for ci in range(1, 7):
+                table.rows[0].cells[0].merge(table.rows[0].cells[ci])
+            hdr = [
+                '(2) Outcome\n(to be lifted directly from the Strategic Plan)',
+                '(3) Strategy/ies\n(to be lifted directly from the Strategic Plan)',
+                '(4) Action Steps/ Program, Activities, Projects (PAPs)',
+                '(5) Performance Indicator/s\n(as stated in the Operational Plan)',
+                '(6) Actual Accomplishments',
+                '(7) Variance',
+                '(8) Remarks',
+            ]
+            for ci, h in enumerate(hdr):
+                table.rows[1].cells[ci].text = h
+            r2 = table.rows[2].cells
+            r2[0].text = 'University Research and Innovation Ecosystem Advanced'
+            r2[1].text = 'Promote cross-disciplinary and interdisciplinary research collaborations'
+            r2[2].text = 'Young Leadership and Innovation for Future Thinkers (Young LIFTERS) Program'
+            r2[3].text = 'Number of students participated in the program'
+            r2[4].text = (
+                'One (1) implemented monitoring of research projects of YLP mentees '
+                'with sufficient narrative length for ingest.'
+            )
+            r2[5].text = 'MET'
+            r2[6].text = 'Last March 14, 2024, the RMS conducted monitoring of YLP research project.'
+            r3 = table.rows[3].cells
+            r2[0].merge(r3[0])
+            r3[1].text = 'Strengthen capability building of researchers in different fields'
+            r3[2].text = 'Regular Writeshops Kapehan and HUNTahan Session'
+            r3[3].text = 'Number of conducted writeshop/HUNTahan Session'
+            r3[4].text = 'Zero (0) regular Writeshops, Kapehan and HUNTahan Session'
+            r3[5].text = 'N/A'
+            r3[6].text = 'The target was initially set for Q1; funds may be moved to Q2.'
+            doc.save(path)
+            n = ingest_word_monitor(path, office_name='UserLayoutOffice', quarter=1, year=2024)
+        finally:
+            if os.path.isfile(path):
+                os.unlink(path)
+
+        recs = list(
+            PerformanceRecord.objects.filter(
+                quarter=1, year=2024, indicator__pap__office__name='UserLayoutOffice'
+            ).select_related('indicator', 'indicator__pap')
+        )
+        descs = sorted(r.indicator.description for r in recs)
+        self.assertEqual(len(recs), 2, f'Saved descriptions: {descs}')
+        self.assertEqual(n, 2)
+        self.assertTrue(any('students participated' in d.lower() for d in descs))
+        self.assertTrue(any('writeshop' in d.lower() for d in descs))
+
+    def test_word_eight_column_grid_young_lifters_and_writeshop_ingested(self):
+        """Tables with a leading # column must map Outcome–Remarks correctly (not shift by one)."""
+        with tempfile.NamedTemporaryFile(suffix='.docx', delete=False) as tmp:
+            tmp.close()
+            path = tmp.name
+        try:
+            doc = Document()
+            doc.add_paragraph('OPERATIONAL PLAN MONITORING MATRIX For 1st Quarter 2024')
+            table = doc.add_table(rows=5, cols=8)
+            hdr = [
+                '',
+                'Outcome (2)',
+                'Strategy/ies (3)',
+                'PAP (4)',
+                'Performance Indicator/s (5)',
+                'Actual Accomplishments (6)',
+                'Variance (7)',
+                'Remarks (8)',
+            ]
+            for ci, h in enumerate(hdr):
+                table.rows[2].cells[ci].text = h
+            r3 = table.rows[3].cells
+            r3[1].text = 'University Research and Innovation Ecosystem Advanced'
+            r3[2].text = 'Promote cross-disciplinary and interdisciplinary research collaborations'
+            r3[3].text = 'Young Leadership and Innovation for Future Thinkers (Young LIFTERS) Program'
+            r3[4].text = 'Number of students participated in the program'
+            r3[5].text = (
+                'One (1) implemented monitoring of research projects of YLP mentees '
+                'with sufficient narrative length for ingest.'
+            )
+            r3[6].text = 'MET'
+            r4 = table.rows[4].cells
+            r4[2].text = 'Strengthen capability building of researchers in different fields'
+            r4[3].text = 'Regular Writeshops Kapehan and HUNTahan Session'
+            r4[4].text = 'Number of conducted writeshop/HUNTahan Session'
+            r4[5].text = 'Zero (0) regular Writeshops, Kapehan and HUNTahan Session'
+            r4[6].text = 'N/A'
+            doc.save(path)
+            n = ingest_word_monitor(path, office_name='EightColGrid', quarter=1, year=2024)
+        finally:
+            if os.path.isfile(path):
+                os.unlink(path)
+
+        self.assertEqual(n, 2)
+        descs = {
+            r.indicator.description
+            for r in PerformanceRecord.objects.filter(
+                quarter=1, year=2024, indicator__pap__office__name='EightColGrid'
+            )
+        }
+        self.assertTrue(any('students participated' in d.lower() for d in descs))
+        self.assertTrue(any('writeshop' in d.lower() for d in descs))
+
+    def test_word_ri_young_lifters_and_writeshop_both_ingested(self):
+        """R&I banner row + Young LIFTERS KPI + Writeshop KPI (user report: first KPI was missing)."""
+        with tempfile.NamedTemporaryFile(suffix='.docx', delete=False) as tmp:
+            tmp.close()
+            path = tmp.name
+        try:
+            _build_word_ri_banner_young_lifters_writeshop_docx(path)
+            n = ingest_word_monitor(path, office_name='RiLiftersWriteshop', quarter=1, year=2024)
+        finally:
+            if os.path.isfile(path):
+                os.unlink(path)
+
+        self.assertEqual(n, 2)
+        recs = list(
+            PerformanceRecord.objects.filter(
+                quarter=1, year=2024, indicator__pap__office__name='RiLiftersWriteshop'
+            ).select_related('indicator')
+        )
+        self.assertEqual(len(recs), 2)
+        descs = {r.indicator.description for r in recs}
+        self.assertTrue(any('students participated' in d.lower() for d in descs))
+        self.assertTrue(any('writeshop' in d.lower() for d in descs))
+
+    def test_word_ri_first_kpi_outcome_filled_with_pillar_real_indicator_kept(self):
+        """Outcome cell shows merged pillar text but Strategy/PAP/Indicator are real KPI columns."""
+        with tempfile.NamedTemporaryFile(suffix='.docx', delete=False) as tmp:
+            tmp.close()
+            path = tmp.name
+        try:
+            doc = Document()
+            doc.add_paragraph('OPERATIONAL PLAN MONITORING MATRIX For 1st Quarter 2024')
+            table = doc.add_table(rows=5, cols=7)
+            hdr = [
+                'Outcome (2)',
+                'Strategy/ies (3)',
+                'PAP (4)',
+                'Performance Indicator/s (5)',
+                'Actual Accomplishments (6)',
+                'Variance (7)',
+                'Remarks (8)',
+            ]
+            for ci, h in enumerate(hdr):
+                table.rows[2].cells[ci].text = h
+            pillar = (
+                'RESEARCH AND INNOVATION: Engineering Innovative Solutions for Sustainable Development'
+            )
+            table.rows[3].cells[0].text = pillar
+            r4 = table.rows[4].cells
+            r4[0].text = pillar
+            r4[1].text = 'Promote cross-disciplinary and interdisciplinary research collaborations'
+            r4[2].text = 'Young Leadership and Innovation for Future Thinkers (Young LIFTERS) Program'
+            r4[3].text = 'Number of students participated in the program'
+            r4[4].text = (
+                'One (1) implemented monitoring of research projects of YLP mentees '
+                'with sufficient narrative length for ingest.'
+            )
+            r4[5].text = 'MET'
+            doc.save(path)
+            n = ingest_word_monitor(path, office_name='RiPillarOutcomeFill', quarter=1, year=2024)
+        finally:
+            if os.path.isfile(path):
+                os.unlink(path)
+
+        self.assertGreaterEqual(n, 1)
+        descs = {
+            r.indicator.description
+            for r in PerformanceRecord.objects.filter(
+                quarter=1, year=2024, indicator__pap__office__name='RiPillarOutcomeFill'
+            )
+        }
+        self.assertTrue(any('students participated' in d.lower() for d in descs))
+
+    def test_word_ri_first_kpi_pillar_cloned_columns_still_ingested(self):
+        """Pillar title repeated in Outcome–Indicator cells with real accomplishment must ingest."""
+        with tempfile.NamedTemporaryFile(suffix='.docx', delete=False) as tmp:
+            tmp.close()
+            path = tmp.name
+        try:
+            _build_word_ri_first_kpi_pillar_cloned_in_hierarchy_docx(path)
+            n = ingest_word_monitor(path, office_name='RiPillarCloneCols', quarter=1, year=2024)
+        finally:
+            if os.path.isfile(path):
+                os.unlink(path)
+
+        self.assertEqual(n, 2)
+        descs = {
+            r.indicator.description
+            for r in PerformanceRecord.objects.filter(
+                quarter=1, year=2024, indicator__pap__office__name='RiPillarCloneCols'
+            )
+        }
+        self.assertTrue(any('writeshop' in d.lower() for d in descs))
+        self.assertTrue(
+            any('monitoring' in d.lower() or 'ylp' in d.lower() or 'row' in d.lower() for d in descs)
+            or any('students' in d.lower() for d in descs)
+        )
+
+    def test_word_ri_first_kpi_duplicate_outcome_strategy_still_ingested(self):
+        """Merged Outcome/Strategy duplicate text must not be classified as a pillar-only banner row."""
+        with tempfile.NamedTemporaryFile(suffix='.docx', delete=False) as tmp:
+            tmp.close()
+            path = tmp.name
+        try:
+            _build_word_ri_first_kpi_duplicate_outcome_strategy_docx(path)
+            n = ingest_word_monitor(path, office_name='RiDupOutcomeStrat', quarter=1, year=2024)
+        finally:
+            if os.path.isfile(path):
+                os.unlink(path)
+
+        self.assertEqual(n, 2)
+        descs = {
+            r.indicator.description
+            for r in PerformanceRecord.objects.filter(
+                quarter=1, year=2024, indicator__pap__office__name='RiDupOutcomeStrat'
+            )
+        }
+        self.assertTrue(any('students participated' in d.lower() for d in descs))
+
+    def test_word_social_banner_row_not_ingested_real_kpis_are(self):
+        """Repeated pillar title + MET must not become a KPI row; following indicators must ingest."""
+        with tempfile.NamedTemporaryFile(suffix='.docx', delete=False) as tmp:
+            tmp.close()
+            path = tmp.name
+        try:
+            _build_word_social_banner_row_plus_two_kpis_docx(path)
+            n = ingest_word_monitor(path, office_name='SocialBannerOffice', quarter=1, year=2026)
+        finally:
+            if os.path.isfile(path):
+                os.unlink(path)
+
+        self.assertEqual(n, 2)
+        recs = list(
+            PerformanceRecord.objects.filter(
+                quarter=1, year=2026, indicator__pap__office__name='SocialBannerOffice'
+            ).select_related('indicator')
+        )
+        self.assertEqual(len(recs), 2)
+        for r in recs:
+            self.assertFalse(record_is_pillar_banner_only(r))
+            self.assertIn('Number of', r.indicator.description)
+
+    def test_word_four_rows_identical_indicator_cell_four_performance_records(self):
+        """Merged-cell repeat of the same indicator label across four rows must yield four DB rows."""
+        with tempfile.NamedTemporaryFile(suffix='.docx', delete=False) as tmp:
+            tmp.close()
+            path = tmp.name
+        try:
+            _build_word_opmm_duplicate_indicator_cell_four_rows_docx(path)
+            ingest_word_monitor(path, office_name='DupFourOffice', quarter=2, year=2026)
+        finally:
+            if os.path.isfile(path):
+                os.unlink(path)
+
+        recs = list(
+            PerformanceRecord.objects.filter(
+                quarter=2, year=2026, indicator__pap__office__name='DupFourOffice'
+            ).select_related('indicator')
+        )
+        self.assertEqual(len(recs), 4)
+        self.assertEqual(len({r.indicator_id for r in recs}), 4)
 
 
 def _build_lpc_wide_monitor_xlsx(path):
@@ -1320,6 +2253,103 @@ class ViewSmokeTests(TestCase):
         self.assertIn('&unmet=', resp.url)
         rec = PerformanceRecord.objects.filter(quarter=4, year=2026).first()
         self.assertIsNotNone(rec)
+
+    def test_upload_staff_resolves_office_name_case_insensitive(self):
+        Office.objects.create(name='Office of Research', code='RESEARCH')
+        User.objects.create_user(
+            username='res',
+            password='pass12345',
+            first_name='office of research',
+        )
+        self.client.login(username='res', password='pass12345')
+        with tempfile.NamedTemporaryFile(suffix='.docx', delete=False) as tmp:
+            tmp.close()
+            _build_min_monitor_docx(tmp.name)
+            with open(tmp.name, 'rb') as fh:
+                data = fh.read()
+            os.unlink(tmp.name)
+        upload = SimpleUploadedFile(
+            'blueprint.docx',
+            data,
+            content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        )
+        resp = self.client.post(
+            reverse('upload_blueprint'),
+            {
+                'blueprint': upload,
+                'ingest_quarter': '4',
+                'ingest_year': '2026',
+            },
+        )
+        self.assertEqual(resp.status_code, 302)
+        rec = PerformanceRecord.objects.filter(quarter=4, year=2026).first()
+        self.assertIsNotNone(rec)
+        self.assertEqual(rec.indicator.pap.office.name, 'Office of Research')
+
+    def test_upload_staff_resolves_office_by_username_code_when_name_mismatches(self):
+        Office.objects.create(name='Office of Something Official', code='MYOFC')
+        User.objects.create_user(
+            username='MYOFC',
+            password='pass12345',
+            first_name='Typo Full Name That Does Not Match DB',
+        )
+        self.client.login(username='MYOFC', password='pass12345')
+        with tempfile.NamedTemporaryFile(suffix='.docx', delete=False) as tmp:
+            tmp.close()
+            _build_min_monitor_docx(tmp.name)
+            with open(tmp.name, 'rb') as fh:
+                data = fh.read()
+            os.unlink(tmp.name)
+        upload = SimpleUploadedFile(
+            'blueprint.docx',
+            data,
+            content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        )
+        resp = self.client.post(
+            reverse('upload_blueprint'),
+            {
+                'blueprint': upload,
+                'ingest_quarter': '1',
+                'ingest_year': '2026',
+            },
+        )
+        self.assertEqual(resp.status_code, 302)
+        rec = PerformanceRecord.objects.filter(quarter=1, year=2026).first()
+        self.assertIsNotNone(rec)
+        self.assertEqual(rec.indicator.pap.office.name, 'Office of Something Official')
+
+    def test_upload_staff_auto_creates_office_when_none_linked(self):
+        User.objects.create_user(
+            username='freshlogin',
+            password='pass12345',
+            first_name='',
+        )
+        self.assertFalse(Office.objects.filter(name='freshlogin').exists())
+        self.client.login(username='freshlogin', password='pass12345')
+        with tempfile.NamedTemporaryFile(suffix='.docx', delete=False) as tmp:
+            tmp.close()
+            _build_min_monitor_docx(tmp.name)
+            with open(tmp.name, 'rb') as fh:
+                data = fh.read()
+            os.unlink(tmp.name)
+        upload = SimpleUploadedFile(
+            'blueprint.docx',
+            data,
+            content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        )
+        resp = self.client.post(
+            reverse('upload_blueprint'),
+            {
+                'blueprint': upload,
+                'ingest_quarter': '2',
+                'ingest_year': '2026',
+            },
+        )
+        self.assertEqual(resp.status_code, 302)
+        self.assertTrue(Office.objects.filter(name='freshlogin').exists())
+        rec = PerformanceRecord.objects.filter(quarter=2, year=2026).first()
+        self.assertIsNotNone(rec)
+        self.assertEqual(rec.indicator.pap.office.name, 'freshlogin')
 
     def test_upload_post_xlsx_redirects_success(self):
         self.client.login(username='root', password='pass12345')

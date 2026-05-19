@@ -93,3 +93,38 @@ Office-only **Clear office data** (`/clear-office-data/`) remains available to s
 ```powershell
 python manage.py test core.tests
 ```
+
+## Deploy to Render
+
+This repo contains a [`render.yaml`](./render.yaml) blueprint that provisions a free Postgres instance and a web service running Gunicorn + WhiteNoise.
+
+1. **Push** the project to a GitHub repository.
+2. In Render, choose **New + ➜ Blueprint**, pick the repo, and click **Apply**. The blueprint:
+   - creates a free Postgres database `sopm-db` and wires `DATABASE_URL` into the web service,
+   - generates `DJANGO_SECRET_KEY`,
+   - sets `DJANGO_DEBUG=false`, `DJANGO_ALLOWED_HOSTS=.onrender.com`, `DATABASE_SSL_REQUIRE=true`,
+   - runs `build.sh` (installs deps, `collectstatic`, `migrate`) on every deploy,
+   - starts the app with `gunicorn SOPM_Config.wsgi:application`.
+3. After the first deploy succeeds, open the Render **Shell** for the web service and create an admin account:
+
+   ```bash
+   python manage.py createsuperuser
+   ```
+
+4. Visit `https://<your-service>.onrender.com/accounts/login/`, sign in, and start uploading monitors.
+
+### Optional production env vars
+
+| Variable | Default | Notes |
+|----------|---------|-------|
+| `DJANGO_CSRF_TRUSTED_ORIGINS` | _empty_ | Comma-separated origins (e.g. a custom domain `https://opmm.example.org`); the Render hostname is added automatically. |
+| `DJANGO_SECURE_SSL_REDIRECT` | `true` | Force HTTPS at the app layer. |
+| `DJANGO_SECURE_HSTS_SECONDS` | `0` | Enable HSTS only when you control the apex domain and have verified TLS. |
+| `SOPM_ENABLE_FULL_DATABASE_CLEAR` | _unset_ | Required if you want superusers to be able to wipe the DB from the UI. |
+| `SOPM_ENABLE_DATABASE_RESTORE` | _unset_ | Allows restoring from an uploaded SQLite backup (mostly useful before migrating off SQLite). |
+
+### Limits to expect on Render's free tier
+
+- The web service sleeps after 15 minutes of inactivity (cold start adds a few seconds on the next request).
+- The free Postgres instance expires after 90 days unless upgraded; export with `pg_dump` before that.
+- Long ingests (large Word / Excel files) should finish within a few seconds; the start command sets a 90-second Gunicorn timeout to accommodate the largest uploads.

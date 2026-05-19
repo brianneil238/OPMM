@@ -31,7 +31,12 @@ from .models import (
     PerformanceRecord,
     StrategicLevel,
 )
-from .services import ingest_excel_monitor, ingest_word_monitor, ingest_word_monitor_with_stats
+from .services import (
+    ingest_excel_monitor,
+    ingest_word_monitor,
+    ingest_word_monitor_with_stats,
+    record_is_pillar_banner_only,
+)
 
 
 def is_admin(user):
@@ -88,7 +93,44 @@ def _validate_sqlite_backup_path(path: Path):
 def _office_for_user(user):
     if user.is_superuser:
         return None
-    return Office.objects.filter(name=user.first_name).first()
+    fn = (user.first_name or '').strip()
+    if fn:
+        office = Office.objects.filter(name__iexact=fn).first()
+        if office:
+            return office
+    un = (user.username or '').strip()
+    if un:
+        office = Office.objects.filter(code__iexact=un).first()
+        if office:
+            return office
+    return None
+
+
+def _ensure_office_for_upload_staff(user):
+    """Resolve or create an Office for staff file uploads (never blocks on missing linkage)."""
+    office = _office_for_user(user)
+    if office:
+        return office
+    fn = (user.first_name or '').strip()
+    un = (user.username or '').strip()
+    if fn:
+        office = Office.objects.filter(name__iexact=fn).first()
+        if not office:
+            office, _ = Office.objects.get_or_create(
+                name=fn,
+                defaults={'code': (un[:50] if un else None) or None},
+            )
+        if un and not office.code:
+            office.code = un[:50]
+            office.save(update_fields=['code'])
+        return office
+    if un:
+        office, _ = Office.objects.get_or_create(
+            name=un,
+            defaults={'code': un[:50]},
+        )
+        return office
+    return None
 
 
 def _activity_log(request, action, detail='', level='info', office=None):
@@ -470,19 +512,9 @@ def upload_blueprint(request):
         post_q, post_y = _ingest_period_from_post(request.POST)
         office_name = 'OVCRDES'
         if not request.user.is_superuser:
-            office = _office_for_user(request.user)
-            if not office:
-                return render(
-                    request,
-                    'core/upload.html',
-                    {
-                        'error': (
-                            'Your account has no office on file. '
-                            'Ask an administrator to register you with your full office name.'
-                        ),
-                    },
-                )
-            office_name = office.name
+            office = _ensure_office_for_upload_staff(request.user)
+            if office:
+                office_name = office.name
 
         failures = []
         successes = 0
@@ -666,43 +698,6 @@ VIEWER_DEVELOPMENT_AREAS = (
         ),
     },
     {
-        'key': 'social_responsibility',
-        'display': 'Social Responsibility',
-        'needles': (
-            'socialresponsibility',
-            # RDE / OVCRES-style mandates: match before pure "research" buckets.
-            'researchdevelopmentandextension',
-            'researchdevelopmentextension',
-            'extensionservices',
-            'extensionservice',
-            'extensionprogram',
-            'extensionoffice',
-            'extensionfunction',
-            'extensionactivities',
-            'extension',
-            'communityengagement',
-            'communityextension',
-            'communityoutreach',
-            'communitydevelopment',
-            'communityservice',
-            'publicservice',
-            'servicelearning',
-            'outreachprogram',
-            'lifelonglearning',
-            'socialimpact',
-            # Common Philippine OP / HEI program tags (often extension + research mix).
-            'ibar',
-            'aanr',
-            'ieetr',
-            'drrm',
-            'disasterrisk',
-            'healthprograms',
-            'technologymobilization',
-            'adoptaschool',
-            'livelihood',
-        ),
-    },
-    {
         'key': 'research_and_innovation',
         'display': 'Research and Innovation',
         'needles': (
@@ -730,6 +725,44 @@ VIEWER_DEVELOPMENT_AREAS = (
             'publicationimpact',
             'sustainabledevelopment',
             'innovativesolutions',
+        ),
+    },
+    {
+        'key': 'social_responsibility',
+        'display': 'Social Responsibility',
+        'needles': (
+            'socialresponsibility',
+            # RDE / OVCRES-style mandates: match before pure "research" buckets.
+            'researchdevelopmentandextension',
+            'researchdevelopmentextension',
+            'extensionservices',
+            'extensionservice',
+            'extensionprogram',
+            'extensionoffice',
+            'extensionfunction',
+            'extensionactivities',
+            # Do not use bare ``extension`` — it matches inside unrelated words (e.g. narratives
+            # mentioning "extension" of a deadline) and hid R&I matrix rows from the R&I tab.
+            'communityengagement',
+            'communityextension',
+            'communityoutreach',
+            'communitydevelopment',
+            'communityservice',
+            'publicservice',
+            'servicelearning',
+            'outreachprogram',
+            'lifelonglearning',
+            'socialimpact',
+            # Common Philippine OP / HEI program tags (often extension + research mix).
+            'ibar',
+            'aanr',
+            'ieetr',
+            'drrm',
+            'disasterrisk',
+            'healthprograms',
+            'technologymobilization',
+            'adoptaschool',
+            'livelihood',
         ),
     },
     {
@@ -782,7 +815,9 @@ _VIEWER_DEV_AREA_KEYS = frozenset(s['key'] for s in VIEWER_DEVELOPMENT_AREAS)
 VIEWER_AREA_ALL = 'all'
 
 # Official OPMM display order (six pillars). Used for dashboard / viewer lists only;
-# ``VIEWER_DEVELOPMENT_AREAS`` tuple order stays optimized for text matching.
+# ``VIEWER_DEVELOPMENT_AREAS`` tuple order is for **substring matching** (first pillar whose
+# needle appears wins) — keep Research & Innovation before Social so R&I outcomes are not
+# mis-bucketed by loose Social needles (e.g. ``extension`` inside narratives).
 OPMM_DASHBOARD_AREA_ORDER = (
     'sustainability',
     'academic_leadership',
@@ -828,9 +863,21 @@ def _viewer_record_dev_area_key(record):
     outcome title, strategy line, PAP label, or indicator wording. Matching
     only the outcome name sent many legitimate R&I / Social rows to the
     Sustainability fallback.
+
+    When the **outcome** cell already contains an OPMM pillar banner (e.g.
+    ``RESEARCH AND INNOVATION: …``), classify from that title **before**
+    scanning indicator/accomplishment text. Otherwise narratives that contain
+    words like ``extension`` can mis-bucket R&I rows into Social, so the R&I
+    tab shows fewer KPIs than were ingested.
     """
-    parts = []
     out = _viewer_outcome_for_record(record)
+    if out and (out.name or '').strip():
+        c0 = _viewer_compact_outcome_name(out.name)
+        if c0:
+            key0 = _viewer_dev_area_key_from_compact_text(c0)
+            if key0 != 'social_responsibility':
+                return key0
+    parts = []
     if out and out.name:
         parts.append(out.name)
     pap = record.indicator.pap
@@ -1073,6 +1120,9 @@ def _performance_viewer_scope(request, *, export_mode=False):
         else:
             period_records = list(year_records.filter(quarter=quarter))
 
+    # Pillar title rows must not appear as KPI lines or inflate MET counts per development area.
+    period_records = [r for r in period_records if not record_is_pillar_banner_only(r)]
+
     counts = {spec['key']: {'met': 0, 'total': 0} for spec in VIEWER_DEVELOPMENT_AREAS}
     for r in period_records:
         key = _viewer_record_dev_area_key(r)
@@ -1123,14 +1173,9 @@ def _performance_viewer_scope(request, *, export_mode=False):
                 if mapped_key and mapped_key in available_area_ids:
                     selected_area_id = mapped_key
         if selected_area_id is None:
-            if not raw_area:
-                # First load / overview: all pillars (explicit ?area= still selects one bucket).
-                selected_area_id = VIEWER_AREA_ALL
-            else:
-                selected_area = max(development_areas, key=lambda a: a['total'], default=None)
-                selected_area_id = (
-                    selected_area['id'] if selected_area else VIEWER_DEVELOPMENT_AREAS[0]['key']
-                )
+            # Never auto-pick a single pillar (that hid ingested rows in other buckets). Default
+            # to the full matrix so counts match the upload without asking the user to change filters.
+            selected_area_id = VIEWER_AREA_ALL
 
         if selected_area_id == VIEWER_AREA_ALL:
             area_records = list(period_records)
@@ -1938,6 +1983,10 @@ def user_management(request):
                     first_name=full_name,
                 )
                 office_obj, _ = Office.objects.get_or_create(name=full_name)
+                abbr = (abbreviation or '').strip()[:50]
+                if abbr and office_obj.code != abbr:
+                    office_obj.code = abbr
+                    office_obj.save(update_fields=['code'])
                 _activity_log(
                     request,
                     'User created',
